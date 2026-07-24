@@ -1,0 +1,89 @@
+
+/* A CASA DO GAMER - style.css - Anti-bug para GitHub Pages */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  background: #020a1a;
+  color: #fff;
+  font-family: 'Rajdhani', system-ui, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fix GitHub Pages MIME and scroll */
+#root { min-height: 100vh; isolation: isolate; }
+
+/* Fonts gamer */
+.font-gamer { font-family: 'Orbitron', monospace; }
+.font-tech { font-family: 'Rajdhani', sans-serif; }
+.font-mono-tech { font-family: 'JetBrains Mono', monospace; }
+
+/* Neon effects */
+.neon-cyan { text-shadow: 0 0 8px rgba(0,245,255,0.8), 0 0 20px rgba(0,245,255,0.4); }
+.neon-border-cyan { box-shadow: 0 0 12px rgba(0,245,255,0.3), inset 0 0 12px rgba(0,245,255,0.1); }
+.neon-green { text-shadow: 0 0 8px rgba(0,255,200,0.8); }
+
+/* Custom scrollbar - evita bug de scroll no Pages */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #020a1a; }
+::-webkit-scrollbar-thumb { background: #00f5ff; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #00ffc8; }
+
+/* Fix input file - ESSENCIAL para não bugar no mobile */
+input[type="file"] {
+  font-family: 'Rajdhani', sans-serif !important;
+  cursor: pointer !important;
+  display: block !important;
+  width: 100% !important;
+  color: white !important;
+}
+input[type="file"]::file-selector-button {
+  background: #00f5ff;
+  color: #020a1a;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  margin-right: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+input[type="file"]::file-selector-button:hover {
+  background: #00ffc8;
+  box-shadow: 0 0 12px rgba(0,255,200,0.6);
+}
+
+/* Reveal animation - sem bug de FOUC */
+.revealed { animation: reveal 0.6s ease-out forwards; }
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* Fix modal - evita overflow bug no GitHub Pages */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+}
+
+/* Garante que Tailwind não quebra */
+img, video { max-width: 100%; height: auto; display: block; }
+
+/* Evita bug de cache do GitHub Pages */
+.cache-buster::after { content: ""; display: none; }

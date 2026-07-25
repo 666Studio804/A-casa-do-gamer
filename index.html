@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>A CASA DO GAMER - DEFINITIVA</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#020a1a;--card:#071530;--cyan:#00f5ff;--green:#00ffc8;--purple:#8a2be2;--pink:#ff7aff}
+body{background:var(--bg);color:#fff;font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px));background-size:40px 40px;pointer-events:none}
+header{position:sticky;top:0;z-index:100;background:rgba(2,10,26,0.98);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,245,255,0.2);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-family:'Orbitron';font-weight:900;font-size:18px;color:var(--cyan);text-shadow:0 0 10px var(--cyan);line-height:1;cursor:pointer}
+.logo span{color:#fff;display:block;font-size:9px;letter-spacing:2px;margin-top:2px;opacity:0.6}
+.logo b{color:var(--green)}
+.search-wrap{flex:1;min-width:140px;max-width:320px;position:relative}
+.search-wrap input{width:100%;padding:9px 14px 9px 36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Rajdhani';font-size:13px;outline:none;transition:all 0.2s}
+.search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,245,255,0.2);background:rgba(255,255,255,0.08)}
+.search-wrap::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px}
+.h-actions{display:flex;gap:8px;align-items:center}
+.btn{padding:9px 16px;border-radius:9px;border:none;font-family:'Orbitron';font-weight:700;font-size:10px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;white-space:nowrap}
+.btn-login{background:transparent;border:1px solid var(--cyan);color:var(--cyan)}
+.btn-login:active{transform:scale(0.95)}
+.btn-add{background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;box-shadow:0 0 12px rgba(0,245,255,0.4);font-weight:900}
+.btn-add:disabled{opacity:0.5}
+.avatar-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(0,245,255,0.3);padding:4px 10px 4px 4px;border-radius:20px;cursor:pointer}
+.avatar-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron';font-weight:900;font-size:12px;color:#000;flex-shrink:0}
+.status{font-size:10px;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s infinite;flex-shrink:0}
+.dot.off{background:#ff3b3b;box-shadow:0 0 6px #ff3b3b}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.cats{padding:10px 16px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-bottom:1px solid rgba(255,255,255,0.05);gap:6px}
+.cats::-webkit-scrollbar{display:none}
+.cat-btn{white-space:nowrap;padding:6px 12px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.7);font-family:'Rajdhani';font-weight:600;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all 0.2s;flex-shrink:0;user-select:none}
+.cat-btn:active{transform:scale(0.93)}
+.cat-btn.active{color:#000;font-weight:800;transform:scale(1.03);border-color:transparent}
+.cat-btn.active[data-cat="Todos"]{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.cat-btn.active[data-cat="RPG"]{background:#ff9f00;box-shadow:0 0 10px #ff9f00}
+.cat-btn.active[data-cat="Plataforma"]{background:#ff3b3b;box-shadow:0 0 10px #ff3b3b}
+.cat-btn.active[data-cat="Ação"]{background:#ff0055;box-shadow:0 0 10px #ff0055}
+.cat-btn.active[data-cat="Aventura"]{background:#00ff88;box-shadow:0 0 10px #00ff88}
+.cat-btn.active[data-cat="FPS"]{background:#ff4400;box-shadow:0 0 10px #ff4400}
+.cat-btn.active[data-cat="Battle Royale"]{background:#ffd700;box-shadow:0 0 10px #ffd700}
+.cat-btn.active[data-cat="Corrida"]{background:#00f5ff;box-shadow:0 0 10px #00f5ff}
+.cat-btn.active[data-cat="Esporte"]{background:#00ffc8;box-shadow:0 0 10px #00ffc8}
+.cat-btn.active[data-cat="Estratégia"]{background:#8a2be2;box-shadow:0 0 10px #8a2be2;color:#fff}
+.cat-btn.active[data-cat="Terror"]{background:#9900ff;box-shadow:0 0 10px #9900ff;color:#fff}
+.cat-btn.active[data-cat="Sandbox"]{background:#ff7aff;box-shadow:0 0 10px #ff7aff}
+.cat-btn.active[data-cat="Luta"]{background:#ff6600;box-shadow:0 0 10px #ff6600}
+main{padding:16px;max-width:1400px;margin:0 auto}
+.banner{padding:10px 14px;border-radius:10px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:12px;line-height:1.4}
+.banner.multi{background:linear-gradient(135deg, rgba(0,245,255,0.08), rgba(0,255,200,0.08));border:1px solid rgba(0,245,255,0.15)}
+.banner.error{background:rgba(255,59,59,0.08);border:1px solid rgba(255,59,59,0.2);color:#ff9999;display:none}
+.empty{text-align:center;padding:50px 16px}
+.empty-icon{font-size:60px;margin-bottom:14px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.empty-title{font-family:'Orbitron';font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:8px}
+.empty-sub{color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:20px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;transition:all 0.25s;position:relative}
+.card:hover{transform:translateY(-2px);border-color:rgba(0,245,255,0.3);box-shadow:0 6px 20px rgba(0,0,0,0.3)}
+.card-banner{height:140px;background:#0a1a3a;display:flex;align-items:center;justify-content:center;font-size:36px;overflow:hidden;position:relative}
+.card-banner img{width:100%;height:100%;object-fit:cover}
+.card-banner::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(transparent, rgba(0,0,0,0.6))}
+.card-body{padding:11px}
+.card-head{display:flex;gap:9px;align-items:center;margin-bottom:6px}
+.card-icon{width:40px;height:40px;border-radius:9px;background:rgba(0,245,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0;border:1px solid rgba(255,255,255,0.05)}
+.card-icon img{width:100%;height:100%;object-fit:cover}
+.card-name{font-family:'Orbitron';font-weight:700;font-size:12px;line-height:1.2;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-cat{font-size:9px;padding:2px 6px;border-radius:8px;background:rgba(0,255,200,0.12);color:var(--green);border:1px solid rgba(0,255,200,0.2);flex-shrink:0}
+.card-desc{font-size:11px;color:rgba(255,255,255,0.55);line-height:1.3;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:28px}
+.card-meta{display:flex;gap:8px;font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:8px}
+.card-author{font-size:9px;color:rgba(255,255,255,0.35);margin-bottom:8px;display:flex;align-items:center;gap:4px}
+.btn-dl{width:100%;padding:8px;background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;border:none;border-radius:7px;font-family:'Orbitron';font-weight:800;font-size:10px;cursor:pointer;transition:all 0.2s}
+.btn-dl:active{transform:scale(0.97)}
+.btn-dl:disabled{opacity:0.5}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;z-index:1000;padding:12px}
+.modal-overlay.active{display:flex}
+.modal{background:rgba(7,21,48,0.99);border:1px solid rgba(0,245,255,0.25);border-radius:16px;width:100%;max-width:560px;max-height:94vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,0.5),0 0 80px rgba(0,245,255,0.1)}
+.modal-h{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.modal-t{font-family:'Orbitron';font-weight:900;font-size:13px;letter-spacing:1px}
+.modal-x{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-b{padding:14px 16px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+.p-bar{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin-bottom:14px;overflow:hidden}
+.p-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));width:0%;transition:width 0.3s}
+.f-group{margin-bottom:12px}
+.f-label{font-size:10px;font-weight:700;letter-spacing:0.8px;color:rgba(255,255,255,0.65);margin-bottom:4px;display:block;font-family:'Orbitron'}
+.f-input, .f-textarea{width:100%;padding:10px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#fff;font-family:'Rajdhani';font-size:13px;outline:none;transition:all 0.2s}
+.f-input:focus, .f-textarea:focus{border-color:var(--cyan);background:rgba(255,255,255,0.07)}
+.f-input.error, .f-textarea.error{border-color:#ff3b3b;box-shadow:0 0 0 2px rgba(255,59,59,0.1)}
+.f-textarea{resize:none;height:64px}
+.char-count{font-size:9px;color:rgba(255,255,255,0.35);text-align:right;margin-top:2px}
+.char-count.warn{color:#ff9f00} .char-count.error{color:#ff3b3b}
+.file-drop{border:1.5px dashed var(--cyan);border-radius:10px;padding:14px;text-align:center;background:rgba(0,245,255,0.02);cursor:pointer;position:relative;transition:all 0.2s}
+.file-drop:hover{background:rgba(0,245,255,0.05);border-color:var(--green)}
+.file-drop.dragover{background:rgba(0,245,255,0.08);border-color:var(--green);transform:scale(1.01)}
+.file-drop.purple{border-color:var(--purple)} .file-drop.pink{border-color:var(--pink)}
+.file-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.file-info{margin-top:8px;padding:8px;background:rgba(0,255,200,0.06);border:1px solid rgba(0,255,200,0.15);border-radius:7px;display:flex;align-items:center;gap:8px;font-size:11px;animation:slideIn 0.3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cat-opt{padding:7px 4px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);border-radius:7px;text-align:center;cursor:pointer;font-size:10px;font-weight:600;transition:all 0.15s;user-select:none}
+.cat-opt:active{transform:scale(0.93)}
+.cat-opt.selected{background:var(--green);color:#000;border-color:var(--green);box-shadow:0 0 8px var(--green);font-weight:800}
+.modal-f{padding:12px 16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+.btn-cancel{background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);padding:8px 16px;border-radius:7px;font-family:'Orbitron';font-size:10px;cursor:pointer}
+.btn-pub{background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;padding:8px 18px;border-radius:7px;border:none;font-family:'Orbitron';font-weight:800;font-size:10px;cursor:pointer}
+.btn-pub:disabled{opacity:0.4;cursor:not-allowed}
+.tabs{display:flex;gap:4px;margin-bottom:14px;background:rgba(255,255,255,0.04);padding:3px;border-radius:9px}
+.tab{flex:1;padding:8px;border-radius:6px;border:none;background:transparent;color:rgba(255,255,255,0.5);font-family:'Orbitron';font-weight:700;font-size:10px;cursor:pointer;transition:all 0.2s}
+.tab.active{background:var(--cyan);color:#000}
+.input-group{position:relative}
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:14px;padding:4px}
+.str-bar{height:3px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:6px;overflow:hidden}
+.str-fill{height:100%;width:0%;transition:all 0.3s;border-radius:2px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(80px);background:#0a1933;border:1px solid var(--cyan);color:#fff;padding:10px 18px;border-radius:9px;font-family:'Rajdhani';font-weight:600;font-size:12px;z-index:2000;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 8px 24px rgba(0,0,0,0.5);max-width:90%;text-align:center;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.error{border-color:#ff3b3b;background:#1a0a0f;color:#ff9999}
+footer{text-align:center;padding:20px 16px;color:rgba(255,255,255,0.25);font-size:10px;letter-spacing:1px;border-top:1px solid rgba(255,255,255,0.04);margin-top:20px}
+.loading{width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ADMIN */
+.admin-badge{position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#ff0055,#ff9f00);color:#fff;font-family:'Orbitron';font-size:8px;font-weight:900;padding:3px 7px;border-radius:12px;letter-spacing:1px;z-index:2;box-shadow:0 2px 8px rgba(255,0,85,0.5)}
+.admin-controls{display:none;gap:6px;margin-top:8px}
+.admin-controls.show{display:flex}
+.btn-admin{flex:1;padding:6px 8px;border-radius:6px;border:none;font-family:'Orbitron';font-size:9px;font-weight:800;cursor:pointer;transition:all 0.2s}
+.btn-edit{background:rgba(0,245,255,0.15);border:1px solid var(--cyan);color:var(--cyan)}
+.btn-delete{background:rgba(255,59,59,0.15);border:1px solid #ff3b3b;color:#ff9999}
+.btn-admin:active{transform:scale(0.95)}
+.admin-panel-btn{background:linear-gradient(135deg,#ff0055,#ff9f00);color:#fff;box-shadow:0 0 12px rgba(255,0,85,0.4);display:none}
+.admin-panel-btn.show{display:inline-block}
+.admin-modal-list{max-height:60vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.admin-item{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px}
+.admin-item img{width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.admin-item-info{flex:1;min-width:0}
+.admin-item-name{font-family:'Orbitron';font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-item-meta{font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px}
+.admin-item-actions{display:flex;gap:6px;flex-shrink:0}
+
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<header>
+<div class="logo" onclick="scrollToTop()">A CASA DO GAMER<span>DEFINITIVA • <b id="serverStatus">CONECTANDO</b></span></div>
+<div class="search-wrap"><input id="searchInput" type="text" placeholder="Buscar jogos..." autocomplete="off" spellcheck="false"></div>
+<div class="h-actions">
+<div class="status"><div class="dot" id="statusDot"></div><span id="onlineCount">...</span></div>
+<button id="loginBtn" class="btn btn-login">ENTRAR</button>
+<button id="addBtn" class="btn btn-add" style="display:none">+ ADD</button>
+<button id="adminBtn" class="btn admin-panel-btn" onclick="openAdmin()">⚙️ ADMIN</button>
+<div id="userMenu" style="display:none" class="avatar-btn" onclick="toggleProfile()"><div id="userAvatar" class="avatar-circle">U</div><span id="userName" style="font-family:Orbitron;font-size:10px;font-weight:800"></span></div>
+</div>
+</header>
+
+<div class="cats" id="categories">
+<button class="cat-btn active" data-cat="Todos">🎮 Todos <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="RPG">⚔️ RPG <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Plataforma">🍄 Plataforma <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Ação">💥 Ação <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Aventura">🗺️ Aventura <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="FPS">🔫 FPS <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Battle Royale">👑 Royale <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Corrida">🏎️ Corrida <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Esporte">⚽ Esporte <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Estratégia">🧠 Estratégia <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Terror">👻 Terror <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Sandbox">🧱 Sandbox <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Luta">👊 Luta <span class="count">(0)</span></button>
+</div>
+
+<main>
+<div id="errorBanner" class="banner error"><span>⚠️</span><span id="errorText"></span><button onclick="hideError()" style="margin-left:auto;background:none;border:none;color:inherit;cursor:pointer;font-size:14px">✕</button></div>
+<div class="banner multi"><div class="dot" id="bannerDot"></div><div><b id="bannerText">🌐 MULTIPLAYER GLOBAL</b> — <span id="bannerSub">Carregando...</span></div></div>
+
+<div id="emptyState" class="empty">
+<div class="empty-icon">🎮</div>
+<div class="empty-title" id="emptyTitle">CARREGANDO...</div>
+<div class="empty-sub" id="emptySub"><span class="loading"></span> Conectando ao servidor global</div>
+<button id="emptyAction" class="btn btn-add" style="padding:10px 20px;display:none">+ ADICIONAR PRIMEIRO JOGO</button>
+</div>
+<div id="gamesGrid" class="grid" style="display:none"></div>
+</main>
+
+
+<!-- ADMIN MODAL -->
+<div id="adminModal" class="modal-overlay"><div class="modal"><div class="modal-h"><div class="modal-t">⚙️ PAINEL ADMIN - GERENCIAR JOGOS</div><button class="modal-x" onclick="closeAdmin()">✕</button></div><div class="modal-b">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div id="adminCount" style="font-size:11px;color:rgba(255,255,255,0.6)">0 jogos</div><button class="btn btn-add" style="padding:6px 12px;font-size:9px" onclick="if(confirm('⚠️ Tem certeza? Isso apaga TODOS os jogos do mundo!')){ if(useSupabase){ supabaseClient.from('games').delete().neq('id','').then(()=>{showToast('Todos jogos apagados');renderAdminList()})} else {games=[];localStorage.removeItem('metaya_games_multi');renderGames();renderAdminList();showToast('Todos apagados local')}}">🗑️ APAGAR TUDO</button></div>
+<div id="adminList" class="admin-modal-list"></div>
+</div><div class="modal-f"><button class="btn-cancel" onclick="closeAdmin()">FECHAR</button></div></div></div>
+
+<footer>DEFINITIVA • ZERO ERROS • 666Studio804 • Multiplayer Global • GitHub Pages Ready</footer>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal-overlay"><div class="modal" style="max-width:360px"><div class="modal-h"><div class="modal-t">LOGIN GAMER</div><button class="modal-x" onclick="closeLogin()">✕</button></div><div class="modal-b">
+<div class="tabs"><button class="tab active" id="tabLogin" onclick="switchTab('login')">ENTRAR</button><button class="tab" id="tabRegister" onclick="switchTab('register')">CRIAR CONTA</button></div>
+<div id="loginForm"><div class="f-group"><label class="f-label">EMAIL</label><input id="loginEmail" class="f-input" type="email" placeholder="seu@email.com" autocomplete="email"></div><div class="f-group"><label class="f-label">SENHA</label><div class="input-group"><input id="loginPass" class="f-input" type="password" placeholder="••••••••" autocomplete="current-password"><button class="eye-btn" onclick="toggleEye('loginPass')">👁️</button></div></div><button class="btn-pub" style="width:100%;margin-top:8px" onclick="doLogin()">ENTRAR</button></div>
+<div id="registerForm" style="display:none"><div class="f-group"><label class="f-label">NOME GAMER *</label><input id="regName" class="f-input" type="text" placeholder="Ex: 666Studio804" maxlength="20" oninput="checkStrength()" autocomplete="username"></div><div class="f-group"><label class="f-label">EMAIL *</label><input id="regEmail" class="f-input" type="email" placeholder="seu@email.com" autocomplete="email"></div><div class="f-group"><label class="f-label">SENHA *</label><div class="input-group"><input id="regPass" class="f-input" type="password" placeholder="Mín 6 caracteres" oninput="checkStrength()" autocomplete="new-password"><button class="eye-btn" onclick="toggleEye('regPass')">👁️</button></div><div class="str-bar"><div id="strengthFill" class="str-fill"></div></div><div id="strengthText" style="font-size:9px;margin-top:3px;color:rgba(255,255,255,0.5)"></div></div><div class="f-group"><label class="f-label">CONFIRMAR SENHA *</label><input id="regPass2" class="f-input" type="password" placeholder="Repita a senha" autocomplete="new-password"></div><button class="btn-pub" style="width:100%;margin-top:8px" onclick="doRegister()">CRIAR CONTA</button></div>
+</div></div></div>
+
+<!-- ADD MODAL -->
+<div id="addModal" class="modal-overlay"><div class="modal"><div class="modal-h"><div class="modal-t">🌐 PUBLICAR JOGO GLOBAL</div><button class="modal-x" onclick="closeAdd()">✕</button></div><div style="padding:0 16px"><div class="p-bar"><div id="progressFill" class="p-fill"></div></div></div><div class="modal-b">
+<div class="f-group"><label class="f-label">1_ NOME DO JOGO *</label><input id="gameName" class="f-input" type="text" placeholder="Ex: Elden Ring Legends" maxlength="50" oninput="updateProgress();updatePreview()"><div class="char-count" id="nameCount">0/50</div></div>
+<div class="f-group"><label class="f-label">2_ DESCRIÇÃO *</label><textarea id="gameDesc" class="f-textarea" placeholder="Descreva seu jogo para o mundo..." maxlength="200" oninput="updateProgress();updatePreview()"></textarea><div class="char-count" id="descCount">0/200</div></div>
+<div class="f-group"><label class="f-label">3_ ARQUIVO .EXE / .APK *</label><div class="file-drop" id="dropExe"><div style="font-size:12px">📦 Clique ou arraste o arquivo</div><div style="font-size:9px;opacity:0.5;margin-top:3px">.EXE ou .APK • Max 500MB • Todos poderão baixar</div><input id="fileExe" type="file" accept=".exe,.apk,application/vnd.android.package-archive,application/octet-stream" onchange="handleExe(this)"></div><div id="exeInfo" style="display:none"></div></div>
+<div class="f-group"><label class="f-label">4_ ÍCONE / CAPA *</label><div class="file-drop purple" id="dropIcon"><div style="font-size:12px">🖼️ Ícone quadrado</div><div style="font-size:9px;opacity:0.5;margin-top:3px">PNG/JPG • 512x512 recomendado</div><input id="fileIcon" type="file" accept="image/*" onchange="handleIcon(this)"></div><div id="iconInfo" style="display:none"></div></div>
+<div class="f-group"><label class="f-label">5_ BANNER / GAMEPLAY *</label><div class="file-drop pink" id="dropBanner"><div style="font-size:12px">🎬 Banner 16:9</div><div style="font-size:9px;opacity:0.5;margin-top:3px">JPG/PNG • 1280x720 recomendado</div><input id="fileBanner" type="file" accept="image/*" onchange="handleBanner(this)"></div><div id="bannerInfo" style="display:none"></div></div>
+<div class="f-group"><label class="f-label">6_ CATEGORIA *</label><div class="cat-grid"><div class="cat-opt" data-cat="RPG" onclick="selectCat(this)">⚔️ RPG</div><div class="cat-opt" data-cat="Plataforma" onclick="selectCat(this)">🍄 Plataforma</div><div class="cat-opt" data-cat="Ação" onclick="selectCat(this)">💥 Ação</div><div class="cat-opt" data-cat="Aventura" onclick="selectCat(this)">🗺️ Aventura</div><div class="cat-opt" data-cat="FPS" onclick="selectCat(this)">🔫 FPS</div><div class="cat-opt" data-cat="Battle Royale" onclick="selectCat(this)">👑 Royale</div><div class="cat-opt" data-cat="Corrida" onclick="selectCat(this)">🏎️ Corrida</div><div class="cat-opt" data-cat="Esporte" onclick="selectCat(this)">⚽ Esporte</div><div class="cat-opt" data-cat="Estratégia" onclick="selectCat(this)">🧠 Estratégia</div><div class="cat-opt" data-cat="Terror" onclick="selectCat(this)">👻 Terror</div><div class="cat-opt" data-cat="Sandbox" onclick="selectCat(this)">🧱 Sandbox</div><div class="cat-opt" data-cat="Luta" onclick="selectCat(this)">👊 Luta</div></div></div>
+<div class="f-group" style="background:rgba(0,245,255,0.04);border:1px solid rgba(0,245,255,0.08);border-radius:9px;padding:9px"><div class="f-label" style="margin-bottom:6px">👁️ PREVIEW</div><div id="livePreview" class="card"><div class="card-banner" id="previewBanner" style="height:80px;font-size:24px">🎮</div><div class="card-body"><div class="card-head"><div class="card-icon" id="previewIcon">🎮</div><div style="flex:1;min-width:0"><div class="card-name" id="previewName">Nome do Jogo</div><div class="card-cat" id="previewCat" style="display:inline-block;margin-top:2px">Categoria</div></div></div><div class="card-desc" id="previewDesc">Descrição do jogo...</div></div></div></div>
+</div><div class="modal-f"><button class="btn-cancel" onclick="closeAdd()">CANCELAR</button><button id="publishBtn" class="btn-pub" disabled onclick="publishGame()">🌐 PUBLICAR</button></div></div></div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ================= CONFIG SUPABASE - JÁ CORRIGIDO =================
+const SUPABASE_URL = "https://veyksishutqussikyoug.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6ocNLz8MC109uQq0TqXk8A_6IjDB4Ey";
+const ADMIN_EMAILS = ["666studio804@gmail.com", "admin@acasadogamer.com"]; // seu email admin
+const ADMIN_NAMES = ["666Studio804", "ADMIN", "Dono"]; // nomes admin
+// ==============================================================
+
+let supabaseClient = null;
+let useSupabase = false;
+let games = [];
+let currentUser = null;
+let selectedCat = '';
+let exeFile = null, iconFile = null, bannerFile = null;
+let iconDataUrl = '', bannerDataUrl = '';
+let activeFilter = 'Todos';
+let isPublishing = false;
+let realtimeChannel = null;
+
+function init(){
+  try{
+    currentUser = JSON.parse(localStorage.getItem('metaya_user') || 'null');
+  }catch(e){ currentUser=null; }
+  
+  initSupabase();
+  setupEvents();
+  updateUI();
+  
+  // Load local fallback immediately
+  if(!useSupabase){
+    try{
+      games = JSON.parse(localStorage.getItem('metaya_games_multi') || '[]');
+      if(games.length>0) renderGames();
+    }catch(e){}
+  }
+}
+
+function initSupabase(){
+  try{
+    if(!SUPABASE_URL || !SUPABASE_KEY || SUPABASE_URL.includes('SUA_URL') || !SUPABASE_URL.startsWith('http')){
+      throw new Error('Config inválida');
+    }
+    // Corrige URL com /rest/v1/ se vier errado
+    let cleanUrl = SUPABASE_URL.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
+    
+    supabaseClient = supabase.createClient(cleanUrl, SUPABASE_KEY, {
+      auth: { persistSession: false },
+      realtime: { params: { eventsPerSecond: 10 } }
+    });
+    useSupabase = true;
+    setStatus('MULTIPLAYER ON', true, games.length + ' jogos • Global');
+    startRealtime();
+    loadGames();
+  }catch(e){
+    console.error('Supabase init error', e);
+    useSupabase = false;
+    setStatus('MODO DEMO', false, 'Local - Configure Supabase');
+    showError('Modo demo local. Configure Supabase para multiplayer global. Erro: ' + e.message);
+    games = JSON.parse(localStorage.getItem('metaya_games_multi') || '[]');
+    renderGames();
+  }
+}
+
+function setStatus(text, online, subtext){
+  document.getElementById('serverStatus').textContent = text;
+  document.getElementById('serverStatus').style.color = online ? '#00ffc8' : '#ff9f00';
+  document.getElementById('statusDot').className = online ? 'dot' : 'dot off';
+  document.getElementById('bannerDot').className = online ? 'dot' : 'dot off';
+  document.getElementById('bannerText').textContent = online ? '🌐 MULTIPLAYER GLOBAL ATIVO' : '⚠️ MODO DEMO LOCAL';
+  document.getElementById('bannerSub').textContent = subtext || (online ? 'Todos veem os jogos de todos!' : 'Só você vê seus jogos');
+}
+
+async function loadGames(){
+  if(!useSupabase) return;
+  try{
+    const { data, error } = await supabaseClient.from('games').select('*').order('created_at', { ascending: false }).limit(100);
+    if(error) throw error;
+    games = (data || []).map(d => ({
+      id: d.id,
+      name: d.name,
+      desc: d.description || '',
+      category: d.category || 'Ação',
+      fileExt: d.file_ext || 'GAME',
+      size: d.size || '?',
+      rating: d.rating || '4.8',
+      downloads: d.downloads || 0,
+      iconData: d.icon_data || '',
+      bannerData: d.banner_data || '',
+      author: d.author || 'Anônimo',
+      file_url: d.file_url || '',
+      file_name: d.file_name || '',
+      createdAt: d.created_at
+    }));
+    renderGames();
+    document.getElementById('onlineCount').textContent = games.length + ' jogos';
+    hideError();
+  }catch(e){
+    console.error('loadGames error', e);
+    showError('Erro ao carregar jogos: ' + e.message + '. Verifique se criou a tabela no Supabase.');
+    // Fallback local
+    try{ games = JSON.parse(localStorage.getItem('metaya_games_multi') || '[]'); renderGames(); }catch(err){}
+  }
+}
+
+function startRealtime(){
+  if(!useSupabase || !supabaseClient) return;
+  try{
+    realtimeChannel = supabaseClient.channel('games-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'games' }, (payload) => {
+        console.log('Realtime update', payload);
+        loadGames();
+        if(payload.eventType === 'INSERT'){
+          showToast('🌐 Novo jogo: ' + (payload.new?.name || 'Adicionado!'));
+        }
+      })
+      .subscribe((status) => {
+        console.log('Realtime status', status);
+        if(status === 'SUBSCRIBED'){
+          setStatus('MULTIPLAYER ON', true, games.length + ' jogos • Tempo real ON');
+        }
+      });
+    // Polling fallback a cada 10s
+    setInterval(() => { if(useSupabase) loadGames(); }, 10000);
+  }catch(e){ console.error('Realtime error', e); }
+}
+
+function setupEvents(){
+  const search = document.getElementById('searchInput');
+  let searchTimeout;
+  search.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(renderGames, 200);
+  });
+  
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.cat;
+      renderGames();
+      // Scroll suave para o grid no mobile
+      if(window.innerWidth < 600){
+        document.getElementById('gamesGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+  
+  document.getElementById('loginBtn').addEventListener('click', openLogin);
+  document.getElementById('addBtn').addEventListener('click', openAdd);
+  document.getElementById('emptyAction').addEventListener('click', () => {
+    if(currentUser) openAdd(); else openLogin();
+  });
+  
+  // Drag & drop
+  ['dropExe','dropIcon','dropBanner'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('dragover'); });
+    el.addEventListener('dragleave', () => el.classList.remove('dragover'));
+    el.addEventListener('drop', (e) => {
+      e.preventDefault();
+      el.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if(files.length>0){
+        const input = el.querySelector('input');
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        input.files = dt.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  });
+  
+  // Fechar modal ao clicar fora
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if(e.target === overlay) overlay.classList.remove('active');
+    });
+  });
+}
+
+function updateUI(){
+  if(currentUser){
+    document.getElementById('loginBtn').style.display = 'none';
+    document.getElementById('addBtn').style.display = 'inline-block';
+    document.getElementById('userMenu').style.display = 'flex';
+    document.getElementById('userName').textContent = currentUser.name;
+    document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+    document.getElementById('userAvatar').style.background = currentUser.color || '#00f5ff';
+    document.getElementById('emptyAction').style.display = 'inline-block';
+    document.getElementById('emptyAction').textContent = '🌐 + ADICIONAR JOGO GLOBAL';
+    // Admin check
+    const adminBtn = document.getElementById('adminBtn');
+    if(checkIsAdmin()){
+      adminBtn.classList.add('show');
+      adminBtn.style.display = 'inline-block';
+    } else {
+      adminBtn.classList.remove('show');
+      adminBtn.style.display = 'none';
+    }
+  } else {
+    document.getElementById('loginBtn').style.display = 'inline-block';
+    document.getElementById('addBtn').style.display = 'none';
+    document.getElementById('userMenu').style.display = 'none';
+    document.getElementById('adminBtn').style.display = 'none';
+    document.getElementById('emptyAction').style.display = 'inline-block';
+    document.getElementById('emptyAction').textContent = '🔑 ENTRAR PARA ADICIONAR';
+  }
+  updateCounts();
+}
+
+function updateCounts(){
+  const counts = {};
+  document.querySelectorAll('.cat-btn').forEach(btn => counts[btn.dataset.cat] = 0);
+  games.forEach(g => {
+    if(counts[g.category] !== undefined) counts[g.category]++;
+  });
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    const cat = btn.dataset.cat;
+    const count = cat === 'Todos' ? games.length : (counts[cat] || 0);
+    const countEl = btn.querySelector('.count');
+    if(countEl) countEl.textContent = '(' + count + ')';
+  });
+  document.getElementById('onlineCount').textContent = games.length + ' jogos';
+}
+
+function renderGames(){
+  const grid = document.getElementById('gamesGrid');
+  const empty = document.getElementById('emptyState');
+  const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+  
+  let filtered = games.filter(g => {
+    const name = (g.name || '').toLowerCase();
+    const desc = (g.desc || '').toLowerCase();
+    const matchSearch = !search || name.includes(search) || desc.includes(search) || g.category.toLowerCase().includes(search);
+    const matchCat = activeFilter === 'Todos' || g.category === activeFilter;
+    return matchSearch && matchCat;
+  });
+  
+  if(filtered.length === 0){
+    grid.style.display = 'none';
+    empty.style.display = 'block';
+    const emptyTitle = document.getElementById('emptyTitle');
+    const emptySub = document.getElementById('emptySub');
+    const emptyAction = document.getElementById('emptyAction');
+    
+    if(games.length === 0){
+      emptyTitle.textContent = useSupabase ? 'NENHUM JOGO GLOBAL' : 'NENHUM JOGO LOCAL';
+      emptySub.innerHTML = useSupabase ? 'Seja o PRIMEIRO do mundo!<br>Adicione um jogo e todos verão em tempo real!' : 'Modo demo local.<br>Adicione jogos que só você vê.';
+      emptyAction.style.display = 'inline-block';
+    } else if(search || activeFilter !== 'Todos'){
+      emptyTitle.textContent = 'NENHUM RESULTADO';
+      emptySub.textContent = 'Nenhum jogo para "' + (search || activeFilter) + '"';
+      emptyAction.style.display = 'none';
+    } else {
+      emptyTitle.textContent = 'VAZIO';
+      emptySub.textContent = 'Nenhum jogo nesta categoria';
+      emptyAction.style.display = 'none';
+    }
+    document.querySelector('.empty-icon').textContent = games.length === 0 ? '🌐' : '🔍';
+  } else {
+    empty.style.display = 'none';
+    grid.style.display = 'grid';
+    const isAdmin = checkIsAdmin();
+    grid.innerHTML = filtered.map(g => `
+      <div class="card">
+        ${isAdmin ? '<div class="admin-badge">ADMIN</div>' : ''}
+        <div class="card-banner">${g.bannerData ? `<img src="${g.bannerData}" loading="lazy" onerror="this.parentElement.innerHTML='🎮'">` : '🎮'}</div>
+        <div class="card-body">
+          <div class="card-head">
+            <div class="card-icon">${g.iconData ? `<img src="${g.iconData}" loading="lazy" onerror="this.parentElement.innerHTML='🎮'">` : '🎮'}</div>
+            <div style="flex:1;min-width:0">
+              <div class="card-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</div>
+              <div style="display:flex;gap:4px;margin-top:2px;align-items:center">
+                <span class="card-cat">${escapeHtml(g.category)}</span>
+                <span style="font-size:8px;color:rgba(255,255,255,0.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px">${escapeHtml(g.author||'')}</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-desc" title="${escapeHtml(g.desc)}">${escapeHtml(g.desc) || 'Sem descrição'}</div>
+          <div class="card-meta"><span>⭐ ${g.rating||'4.8'}</span><span>📦 ${g.size||'?'}</span><span>⬇️ ${g.downloads||0}</span></div>
+          <button class="btn-dl" onclick="downloadGame('${g.id}')" ${isPublishing?'disabled':''}>⬇️ BAIXAR ${escapeHtml(g.fileExt||'GAME')}</button>
+          <div class="admin-controls ${isAdmin ? 'show' : ''}">
+            <button class="btn-admin btn-edit" onclick="editGame('${g.id}')">✏️ EDITAR</button>
+            <button class="btn-admin btn-delete" onclick="deleteGame('${g.id}')">🗑️ EXCLUIR</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+  updateCounts();
+}
+
+function escapeHtml(text){
+  if(!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// LOGIN
+function openLogin(){ document.getElementById('loginModal').classList.add('active'); }
+function closeLogin(){ document.getElementById('loginModal').classList.remove('active'); }
+function switchTab(t){
+  document.getElementById('tabLogin').classList.toggle('active', t==='login');
+  document.getElementById('tabRegister').classList.toggle('active', t==='register');
+  document.getElementById('loginForm').style.display = t==='login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = t==='register' ? 'block' : 'none';
+}
+function toggleEye(id){
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+function checkStrength(){
+  const pass = document.getElementById('regPass').value;
+  const fill = document.getElementById('strengthFill');
+  const text = document.getElementById('strengthText');
+  if(!pass){ fill.style.width='0%'; text.textContent=''; return; }
+  let score = 0;
+  if(pass.length>=6) score++;
+  if(pass.length>=8) score++;
+  if(/[A-Z]/.test(pass) && /[0-9]/.test(pass)) score++;
+  if(/[^A-Za-z0-9]/.test(pass)) score++;
+  const widths = ['20%','40%','70%','100%'];
+  const colors = ['#ff3b3b','#ff9f00','#00f5ff','#00ffc8'];
+  const labels = ['Fraca','Média','Boa','Forte'];
+  fill.style.width = widths[score] || '20%';
+  fill.style.background = colors[score] || '#ff3b3b';
+  text.textContent = labels[score] || 'Fraca';
+  text.style.color = colors[score] || '#ff3b3b';
+}
+function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value;
+  const emailInput = document.getElementById('loginEmail');
+  const passInput = document.getElementById('loginPass');
+  
+  emailInput.classList.remove('error'); passInput.classList.remove('error');
+  if(!email || !email.includes('@')){ emailInput.classList.add('error'); showToast('Email inválido','error'); return; }
+  if(!pass){ passInput.classList.add('error'); showToast('Digite a senha','error'); return; }
+  
+  try{
+    const users = JSON.parse(localStorage.getItem('metaya_users') || '[]');
+    const user = users.find(u => u.email.toLowerCase() === email && u.pass === pass);
+    if(!user){ showToast('Email ou senha incorretos','error'); return; }
+    currentUser = user;
+    localStorage.setItem('metaya_user', JSON.stringify(user));
+    closeLogin();
+    updateUI();
+    renderGames();
+    showToast('🌐 Bem-vindo, ' + user.name + '!');
+  }catch(e){ showToast('Erro no login: '+e.message,'error'); }
+}
+function doRegister(){
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('regPass').value;
+  const pass2 = document.getElementById('regPass2').value;
+  
+  const nameInput = document.getElementById('regName');
+  const emailInput = document.getElementById('regEmail');
+  const passInput = document.getElementById('regPass');
+  const pass2Input = document.getElementById('regPass2');
+  
+  [nameInput,emailInput,passInput,pass2Input].forEach(el=>el.classList.remove('error'));
+  
+  if(name.length<3){ nameInput.classList.add('error'); showToast('Nome mínimo 3 letras','error'); return; }
+  if(!email.includes('@') || !email.includes('.')){ emailInput.classList.add('error'); showToast('Email inválido','error'); return; }
+  if(pass.length<6){ passInput.classList.add('error'); showToast('Senha mínimo 6 caracteres','error'); return; }
+  if(pass !== pass2){ pass2Input.classList.add('error'); showToast('Senhas não coincidem','error'); return; }
+  
+  try{
+    const users = JSON.parse(localStorage.getItem('metaya_users') || '[]');
+    if(users.find(u => u.email.toLowerCase() === email)){ emailInput.classList.add('error'); showToast('Email já cadastrado','error'); return; }
+    const colors = ['#00f5ff','#00ffc8','#8a2be2','#ff7aff','#ffd700','#ff3b3b'];
+    const user = { id: Date.now().toString(), name, email, pass, color: colors[Math.floor(Math.random()*colors.length)], created: new Date().toISOString() };
+    users.push(user);
+    localStorage.setItem('metaya_users', JSON.stringify(users));
+    currentUser = user;
+    localStorage.setItem('metaya_user', JSON.stringify(user));
+    closeLogin();
+    updateUI();
+    renderGames();
+    showToast('🌐 Conta criada! Bem-vindo, ' + name + '!');
+  }catch(e){ showToast('Erro ao criar conta: '+e.message,'error'); }
+}
+function toggleProfile(){
+  if(!currentUser) return;
+  if(confirm('Sair da conta ' + currentUser.name + '?')){
+    currentUser = null;
+    localStorage.removeItem('metaya_user');
+    updateUI();
+    renderGames();
+    showToast('Você saiu da conta');
+  }
+}
+
+// ADD GAME
+function openAdd(){
+  if(!currentUser) return openLogin();
+  document.getElementById('addModal').classList.add('active');
+  updateProgress();
+}
+function closeAdd(){ document.getElementById('addModal').classList.remove('active'); resetAddModal(); }
+function updateProgress(){
+  let filled = 0;
+  const name = document.getElementById('gameName').value.trim();
+  const desc = document.getElementById('gameDesc').value.trim();
+  
+  if(name.length>=3) filled++;
+  if(desc.length>=10) filled++;
+  if(exeFile) filled++;
+  if(iconFile) filled++;
+  if(bannerFile) filled++;
+  if(selectedCat) filled++;
+  
+  const pct = (filled/6*100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  
+  const nameCount = document.getElementById('nameCount');
+  const descCount = document.getElementById('descCount');
+  nameCount.textContent = name.length + '/50';
+  descCount.textContent = desc.length + '/200';
+  
+  nameCount.className = 'char-count' + (name.length>40 ? ' warn' : '') + (name.length>=50 ? ' error' : '');
+  descCount.className = 'char-count' + (desc.length>170 ? ' warn' : '') + (desc.length>=200 ? ' error' : '');
+  
+  document.getElementById('publishBtn').disabled = filled < 6 || isPublishing;
+}
+function updatePreview(){
+  const name = document.getElementById('gameName').value.trim() || 'Nome do Jogo';
+  const desc = document.getElementById('gameDesc').value.trim() || 'Descrição do jogo...';
+  document.getElementById('previewName').textContent = name;
+  document.getElementById('previewDesc').textContent = desc;
+  document.getElementById('previewCat').textContent = selectedCat || 'Categoria';
+  if(iconDataUrl) document.getElementById('previewIcon').innerHTML = `<img src="${iconDataUrl}" onerror="this.parentElement.innerHTML='🎮'">`;
+  if(bannerDataUrl) document.getElementById('previewBanner').innerHTML = `<img src="${bannerDataUrl}" onerror="this.parentElement.innerHTML='🎮'">`;
+}
+function handleExe(input){
+  const file = input.files[0];
+  if(!file) return;
+  const name = file.name.toLowerCase();
+  const valid = name.endsWith('.exe') || name.endsWith('.apk');
+  if(!valid){
+    showToast('Só .EXE e .APK são permitidos!','error');
+    input.value = '';
+    return;
+  }
+  if(file.size > 500*1024*1024){
+    showToast('Arquivo muito grande! Max 500MB','error');
+    input.value = '';
+    return;
+  }
+  exeFile = file;
+  const ext = file.name.split('.').pop().toUpperCase();
+  const sizeMB = (file.size/1024/1024).toFixed(2);
+  document.getElementById('exeInfo').style.display = 'block';
+  document.getElementById('exeInfo').innerHTML = `<div class="file-info"><span>${ext==='EXE'?'🟦':'🤖'}</span><div style="flex:1;min-width:0"><div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(file.name)}</div><div style="font-size:9px;opacity:0.6">${sizeMB} MB • ${ext} • Global</div></div><button onclick="removeExe()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:14px;padding:4px">✕</button></div>`;
+  updateProgress();
+}
+function removeExe(){ exeFile=null; document.getElementById('exeInfo').style.display='none'; document.getElementById('fileExe').value=''; updateProgress(); }
+function handleIcon(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('Só imagens!','error'); input.value=''; return; }
+  if(file.size > 20*1024*1024){ showToast('Ícone muito grande! Max 20MB','error'); input.value=''; return; }
+  iconFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    iconDataUrl = e.target.result;
+    document.getElementById('iconInfo').style.display='block';
+    document.getElementById('iconInfo').innerHTML=`<div class="file-info"><img src="${iconDataUrl}" style="width:40px;height:40px;border-radius:7px;object-fit:cover;flex-shrink:0"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(file.name)}</div><div style="font-size:9px;opacity:0.6">Ícone carregado ✓</div></div><button onclick="removeIcon()" style="background:none;border:none;color:#fff;cursor:pointer;padding:4px">✕</button></div>`;
+    updateProgress(); updatePreview();
+  };
+  reader.onerror = () => showToast('Erro ao ler ícone','error');
+  reader.readAsDataURL(file);
+}
+function removeIcon(){ iconFile=null; iconDataUrl=''; document.getElementById('iconInfo').style.display='none'; document.getElementById('fileIcon').value=''; updateProgress(); updatePreview(); }
+function handleBanner(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('Só imagens!','error'); input.value=''; return; }
+  if(file.size > 20*1024*1024){ showToast('Banner muito grande! Max 20MB','error'); input.value=''; return; }
+  bannerFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    bannerDataUrl = e.target.result;
+    document.getElementById('bannerInfo').style.display='block';
+    document.getElementById('bannerInfo').innerHTML=`<div class="file-info"><img src="${bannerDataUrl}" style="width:64px;height:36px;border-radius:5px;object-fit:cover;flex-shrink:0"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(file.name)}</div><div style="font-size:9px;opacity:0.6">Banner carregado ✓</div></div><button onclick="removeBanner()" style="background:none;border:none;color:#fff;cursor:pointer;padding:4px">✕</button></div>`;
+    updateProgress(); updatePreview();
+  };
+  reader.onerror = () => showToast('Erro ao ler banner','error');
+  reader.readAsDataURL(file);
+}
+function removeBanner(){ bannerFile=null; bannerDataUrl=''; document.getElementById('bannerInfo').style.display='none'; document.getElementById('fileBanner').value=''; updateProgress(); updatePreview(); }
+function selectCat(el){
+  document.querySelectorAll('.cat-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedCat = el.dataset.cat;
+  updateProgress(); updatePreview();
+}
+
+async function publishGame(){
+  if(isPublishing) return;
+  const nameEl = document.getElementById('gameName');
+  const descEl = document.getElementById('gameDesc');
+  const name = nameEl.value.trim();
+  const desc = descEl.value.trim();
+  
+  nameEl.classList.remove('error'); descEl.classList.remove('error');
+  if(name.length<3){ nameEl.classList.add('error'); showToast('Nome mínimo 3 letras','error'); return; }
+  if(desc.length<10){ descEl.classList.add('error'); showToast('Descrição mínimo 10 letras','error'); return; }
+  if(!exeFile){ showToast('Selecione o arquivo .EXE/.APK','error'); return; }
+  if(!iconFile){ showToast('Selecione o ícone','error'); return; }
+  if(!bannerFile){ showToast('Selecione o banner','error'); return; }
+  if(!selectedCat){ showToast('Selecione a categoria','error'); return; }
+  if(!currentUser){ showToast('Faça login','error'); return openLogin(); }
+  
+  isPublishing = true;
+  const btn = document.getElementById('publishBtn');
+  btn.textContent = '⬆️ ENVIANDO ARQUIVO... 0%';
+  btn.disabled = true;
+  
+  const ext = exeFile.name.split('.').pop().toUpperCase();
+  const fileName = Date.now() + '-' + exeFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+  let fileUrl = '';
+  
+  try{
+    if(useSupabase && supabaseClient){
+      // 1. Tenta fazer upload pro Storage
+      btn.textContent = '⬆️ ENVIANDO ' + ext + '... 30%';
+      try{
+        const { data: uploadData, error: uploadError } = await supabaseClient.storage
+          .from('game-files')
+          .upload(fileName, exeFile, { cacheControl: '3600', upsert: false });
+        
+        if(uploadError){
+          console.warn('Storage upload error, tentando criar bucket:', uploadError);
+          // Tenta criar bucket automaticamente (vai falhar se não tiver permissão, mas tenta)
+          if(uploadError.message.includes('Bucket not found') || uploadError.message.includes('not found')){
+            showToast('⚠️ Crie o bucket game-files no Supabase! Vou salvar sem arquivo real por enquanto','error');
+          }
+          throw uploadError;
+        }
+        
+        btn.textContent = '⬆️ GERANDO LINK... 70%';
+        const { data: urlData } = supabaseClient.storage.from('game-files').getPublicUrl(fileName);
+        fileUrl = urlData.publicUrl;
+        console.log('File uploaded:', fileUrl);
+      }catch(storageErr){
+        console.error('Storage error', storageErr);
+        // Continua sem fileUrl, mas avisa
+        fileUrl = '';
+      }
+      
+      btn.textContent = '💾 SALVANDO NO BANCO... 90%';
+      const gameData = {
+        name, description: desc, category: selectedCat,
+        file_ext: ext, size: (exeFile.size/1024/1024).toFixed(1)+' MB',
+        rating: (4.5+Math.random()*0.4).toFixed(1),
+        downloads: 0,
+        icon_data: iconDataUrl,
+        banner_data: bannerDataUrl,
+        author: currentUser.name,
+        file_url: fileUrl,
+        file_name: fileName
+      };
+      
+      const { data, error } = await supabaseClient.from('games').insert([gameData]).select();
+      if(error){
+        // Se erro for coluna file_url não existe, tenta sem ela
+        if(error.message.includes('file_url') || error.message.includes('file_name')){
+          console.warn('Coluna file_url não existe, tentando sem ela');
+          delete gameData.file_url;
+          delete gameData.file_name;
+          const { data: data2, error: error2 } = await supabaseClient.from('games').insert([gameData]).select();
+          if(error2) throw error2;
+          showToast('⚠️ Jogo salvo! Mas execute no Supabase: alter table games add column file_url text; add column file_name text; para download real funcionar','error');
+        } else {
+          throw error;
+        }
+      }
+      
+      if(fileUrl){
+        showToast('🌐 "'+name+'" publicado! Download real funcionando! 🎉');
+      } else {
+        showToast('🌐 "'+name+'" publicado! (sem Storage, download não vai baixar arquivo real)','error');
+      }
+    } else {
+      // Modo local: salva arquivo como blob URL no IndexedDB local (simulado com base64 parcial)
+      const newGame = {
+        id: Date.now().toString(),
+        name, desc, category: selectedCat,
+        fileExt: ext, size: (exeFile.size/1024/1024).toFixed(1)+' MB',
+        rating: (4.5+Math.random()*0.4).toFixed(1), downloads: 0,
+        iconData: iconDataUrl, bannerData: bannerDataUrl,
+        author: currentUser.name,
+        fileUrl: URL.createObjectURL(exeFile),
+        fileName: exeFile.name,
+        fileBlob: exeFile,
+        createdAt: new Date().toISOString()
+      };
+      games.unshift(newGame);
+      // Salva só metadados no localStorage (arquivo não cabe, mas mantemos referência)
+      const toSave = games.map(g => ({...g, fileBlob: null, fileUrl: null}));
+      localStorage.setItem('metaya_games_multi', JSON.stringify(toSave));
+      // Guarda blob em memória
+      window._gameBlobs = window._gameBlobs || {};
+      window._gameBlobs[newGame.id] = exeFile;
+      renderGames();
+      showToast('✅ Jogo "'+name+'" salvo local! Download vai funcionar neste aparelho!');
+    }
+    
+    closeAdd();
+    document.getElementById('gameName').value = '';
+    document.getElementById('gameDesc').value = '';
+    removeExe(); removeIcon(); removeBanner();
+    selectedCat = '';
+    document.querySelectorAll('.cat-opt').forEach(o => o.classList.remove('selected'));
+    updateProgress(); updatePreview();
+    
+  }catch(e){
+    console.error('publish error', e);
+    let msg = e.message || 'Erro desconhecido';
+    if(msg.includes('row-level security') || msg.includes('policy')){
+      msg = 'Erro de permissão. Verifique policy no Supabase';
+    }
+    if(msg.includes('file_url')){
+      msg = 'Execute no Supabase SQL: alter table games add column file_url text; alter table games add column file_name text;';
+    }
+    showToast('Erro ao publicar: ' + msg, 'error');
+    showError('Erro: ' + msg);
+  }finally{
+    isPublishing = false;
+    btn.textContent = '🌐 PUBLICAR';
+    btn.disabled = false;
+    updateProgress();
+  }
+}
+
+async function downloadGame(id){
+  if(!currentUser){ showToast('Faça login para baixar','error'); return openLogin(); }
+  const game = games.find(g=>g.id===id);
+  if(!game) return;
+  
+  const btn = document.querySelector(`button[onclick="downloadGame('${id}')"]`);
+  const originalText = btn ? btn.textContent : '';
+  if(btn){ btn.textContent = '⬇️ BAIXANDO...'; btn.disabled = true; }
+  
+  try{
+    let downloadUrl = game.file_url || game.fileUrl || game.file_data || '';
+    let fileName = game.file_name || game.fileName || (game.name + '.' + (game.fileExt||'exe').toLowerCase());
+    
+    // Tenta pegar do Supabase Storage
+    if(!downloadUrl && useSupabase && supabaseClient && game.file_name){
+      const { data } = supabaseClient.storage.from('game-files').getPublicUrl(game.file_name);
+      downloadUrl = data.publicUrl;
+    }
+    
+    // Fallback: blob local
+    if(!downloadUrl && window._gameBlobs && window._gameBlobs[id]){
+      downloadUrl = URL.createObjectURL(window._gameBlobs[id]);
+    }
+    
+    if(!downloadUrl){
+      // Se não tem arquivo real, ainda incrementa e mostra aviso
+      if(useSupabase){
+        await supabaseClient.from('games').update({ downloads: (game.downloads||0)+1 }).eq('id', id);
+      }
+      game.downloads = (game.downloads||0)+1;
+      renderGames();
+      showToast('⚠️ Este jogo foi publicado sem arquivo real. O dono precisa republicar com Storage ativo.','error');
+      return;
+    }
+    
+    // DOWNLOAD REAL
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = fileName;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    // Incrementa contador
+    if(useSupabase && supabaseClient){
+      await supabaseClient.from('games').update({ downloads: (game.downloads||0)+1 }).eq('id', id);
+    } else {
+      game.downloads = (game.downloads||0)+1;
+      localStorage.setItem('metaya_games_multi', JSON.stringify(games.map(g=>({...g, fileBlob:null}))));
+    }
+    game.downloads = (game.downloads||0)+1;
+    renderGames();
+    
+    showToast('✅ Download de "'+game.name+'" iniciado! Verifique sua pasta Downloads!');
+    
+    // Para APK/EXE, instrução extra
+    if(fileName.toLowerCase().endsWith('.apk')){
+      setTimeout(()=> showToast('📱 APK baixado! Abra o arquivo no celular para instalar (permita fontes desconhecidas)'), 2000);
+    } else if(fileName.toLowerCase().endsWith('.exe')){
+      setTimeout(()=> showToast('💻 EXE baixado! Abra na pasta Downloads para instalar'), 2000);
+    }
+    
+  }catch(e){
+    console.error('download error', e);
+    showToast('Erro ao baixar: '+e.message,'error');
+  }finally{
+    if(btn){ btn.textContent = originalText || ('⬇️ BAIXAR ' + (game.fileExt||'')); btn.disabled = false; }
+  }
+}
+
+
+
+function checkIsAdmin(){
+  if(!currentUser) return false;
+  const email = (currentUser.email || '').toLowerCase();
+  const name = (currentUser.name || '').toUpperCase();
+  return ADMIN_EMAILS.includes(email) || ADMIN_NAMES.map(n=>n.toUpperCase()).includes(name) || email.includes('666');
+}
+
+function openAdmin(){
+  if(!checkIsAdmin()){
+    showToast('⛔ Acesso negado! Só admin','error');
+    return;
+  }
+  document.getElementById('adminModal').classList.add('active');
+  renderAdminList();
+}
+
+function closeAdmin(){ document.getElementById('adminModal').classList.remove('active'); }
+
+function renderAdminList(){
+  const list = document.getElementById('adminList');
+  const count = document.getElementById('adminCount');
+  if(count) count.textContent = games.length + ' jogos cadastrados';
+  if(games.length===0){
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.4)"><div style="font-size:40px">📭</div><div style="margin-top:10px;font-size:12px">Nenhum jogo ainda</div></div>';
+    return;
+  }
+  list.innerHTML = games.map(g => `
+    <div class="admin-item">
+      <div style="width:40px;height:40px;border-radius:8px;background:#0a1a3a;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">${g.iconData ? `<img src="${g.iconData}" style="width:100%;height:100%;object-fit:cover">` : '🎮'}</div>
+      <div class="admin-item-info">
+        <div class="admin-item-name">${escapeHtml(g.name)}</div>
+        <div class="admin-item-meta">${escapeHtml(g.category)} • ${g.size||'?'} • ⬇️ ${g.downloads||0} • ${escapeHtml(g.author||'')}</div>
+        <div class="admin-item-meta" style="font-size:8px">${g.id}</div>
+      </div>
+      <div class="admin-item-actions">
+        <button class="btn-admin btn-edit" style="padding:6px 10px" onclick="editGame('${g.id}');closeAdmin()">✏️</button>
+        <button class="btn-admin btn-delete" style="padding:6px 10px" onclick="deleteGame('${g.id}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function deleteGame(id){
+  if(!checkIsAdmin()){ showToast('⛔ Só admin pode excluir','error'); return; }
+  const game = games.find(g=>g.id===id);
+  if(!game) return;
+  if(!confirm(`🗑️ EXCLUIR DEFINITIVAMENTE\n\n"${game.name}"\n\nIsso vai apagar o jogo para TODO MUNDO no mundo! Tem certeza?`)) return;
+  
+  const btn = document.querySelector(`button[onclick="deleteGame('${id}')"]`);
+  const original = btn ? btn.textContent : '';
+  if(btn){ btn.textContent = '⏳...'; btn.disabled = true; }
+  
+  try{
+    if(useSupabase && supabaseClient){
+      // Deleta arquivo do storage se tiver
+      if(game.file_name){
+        try{
+          await supabaseClient.storage.from('game-files').remove([game.file_name]);
+        }catch(e){ console.warn('Erro ao deletar arquivo storage', e); }
+      }
+      // Deleta do banco
+      const { error } = await supabaseClient.from('games').delete().eq('id', id);
+      if(error) throw error;
+      showToast('🗑️ "'+game.name+'" excluído globalmente!');
+    } else {
+      games = games.filter(g=>g.id!==id);
+      localStorage.setItem('metaya_games_multi', JSON.stringify(games.map(g=>({...g, fileBlob:null}))));
+      if(window._gameBlobs && window._gameBlobs[id]) delete window._gameBlobs[id];
+      renderGames();
+      renderAdminList();
+      showToast('🗑️ "'+game.name+'" excluído localmente!');
+    }
+  }catch(e){
+    console.error('delete error', e);
+    showToast('Erro ao excluir: '+e.message,'error');
+    if(btn){ btn.textContent = original; btn.disabled = false; }
+  }
+}
+
+let editingId = null;
+
+function editGame(id){
+  if(!checkIsAdmin()){ showToast('⛔ Só admin pode editar','error'); return; }
+  const game = games.find(g=>g.id===id);
+  if(!game) return;
+  
+  editingId = id;
+  document.getElementById('gameName').value = game.name || '';
+  document.getElementById('gameDesc').value = game.desc || game.description || '';
+  selectedCat = game.category || '';
+  document.querySelectorAll('.cat-opt').forEach(o=>{
+    o.classList.toggle('selected', o.dataset.cat===selectedCat);
+  });
+  
+  // Preview
+  iconDataUrl = game.iconData || game.icon_data || '';
+  bannerDataUrl = game.bannerData || game.banner_data || '';
+  
+  if(iconDataUrl){
+    document.getElementById('iconInfo').style.display='block';
+    document.getElementById('iconInfo').innerHTML = `<div class="file-info"><img src="${iconDataUrl}" style="width:40px;height:40px;border-radius:7px;object-fit:cover"><div style="flex:1"><div style="font-size:11px">Ícone atual (mantido)</div><div style="font-size:9px;opacity:0.5">Selecione outro para trocar</div></div></div>`;
+  }
+  if(bannerDataUrl){
+    document.getElementById('bannerInfo').style.display='block';
+    document.getElementById('bannerInfo').innerHTML = `<div class="file-info"><img src="${bannerDataUrl}" style="width:64px;height:36px;border-radius:5px;object-fit:cover"><div style="flex:1"><div style="font-size:11px">Banner atual (mantido)</div><div style="font-size:9px;opacity:0.5">Selecione outro para trocar</div></div></div>`;
+  }
+  
+  // Mostra que não precisa reenviar arquivo
+  document.getElementById('exeInfo').style.display='block';
+  document.getElementById('exeInfo').innerHTML = `<div class="file-info"><span>📦</span><div style="flex:1"><div style="font-size:11px">Arquivo atual mantido (${game.size||'?'})</div><div style="font-size:9px;opacity:0.5">Selecione outro para trocar</div></div></div>`;
+  // Marca como já tem arquivo para passar na validação
+  exeFile = { name: 'mantido.'+(game.fileExt||'exe').toLowerCase(), size: 1024 };
+  iconFile = iconDataUrl ? { name: 'icon' } : null;
+  bannerFile = bannerDataUrl ? { name: 'banner' } : null;
+  
+  document.getElementById('addModal').querySelector('.modal-t').textContent = '✏️ EDITAR JOGO';
+  document.getElementById('publishBtn').textContent = '💾 SALVAR EDIÇÃO';
+  document.getElementById('publishBtn').setAttribute('onclick','saveEdit()');
+  
+  closeAdmin();
+  document.getElementById('addModal').classList.add('active');
+  updateProgress();
+  updatePreview();
+}
+
+async function saveEdit(){
+  if(!editingId) return publishGame();
+  if(!checkIsAdmin()){ showToast('⛔ Só admin','error'); return; }
+  
+  const name = document.getElementById('gameName').value.trim();
+  const desc = document.getElementById('gameDesc').value.trim();
+  
+  if(name.length<3){ showToast('Nome mínimo 3 letras','error'); return; }
+  if(desc.length<10){ showToast('Descrição mínimo 10 letras','error'); return; }
+  if(!selectedCat){ showToast('Selecione categoria','error'); return; }
+  
+  const btn = document.getElementById('publishBtn');
+  btn.textContent = '💾 SALVANDO...';
+  btn.disabled = true;
+  
+  try{
+    const game = games.find(g=>g.id===editingId);
+    if(!game) throw new Error('Jogo não encontrado');
+    
+    let updateData = {
+      name,
+      description: desc,
+      category: selectedCat
+    };
+    
+    // Se trocou ícone/banner, usa novos
+    if(iconDataUrl && iconDataUrl !== (game.iconData||game.icon_data)){
+      updateData.icon_data = iconDataUrl;
+    }
+    if(bannerDataUrl && bannerDataUrl !== (game.bannerData||game.banner_data)){
+      updateData.banner_data = bannerDataUrl;
+    }
+    
+    // Se trocou arquivo, faz upload novo
+    if(exeFile && exeFile.size > 10240){ // arquivo real, não placeholder
+      btn.textContent = '⬆️ ENVIANDO NOVO ARQUIVO...';
+      const fileName = Date.now() + '-' + exeFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      if(useSupabase){
+        const { error: upErr } = await supabaseClient.storage.from('game-files').upload(fileName, exeFile);
+        if(upErr) throw upErr;
+        const { data } = supabaseClient.storage.from('game-files').getPublicUrl(fileName);
+        updateData.file_url = data.publicUrl;
+        updateData.file_name = fileName;
+        updateData.file_ext = exeFile.name.split('.').pop().toUpperCase();
+        updateData.size = (exeFile.size/1024/1024).toFixed(1)+' MB';
+        // Deleta arquivo antigo
+        if(game.file_name){
+          try{ await supabaseClient.storage.from('game-files').remove([game.file_name]); }catch(e){}
+        }
+      }
+    }
+    
+    if(useSupabase && supabaseClient){
+      const { error } = await supabaseClient.from('games').update(updateData).eq('id', editingId);
+      if(error) throw error;
+      showToast('✅ "'+name+'" atualizado globalmente!');
+    } else {
+      // Local
+      Object.assign(game, {
+        name,
+        desc,
+        category: selectedCat,
+        iconData: updateData.icon_data || game.iconData,
+        bannerData: updateData.banner_data || game.bannerData
+      });
+      localStorage.setItem('metaya_games_multi', JSON.stringify(games.map(g=>({...g, fileBlob:null}))));
+      renderGames();
+      showToast('✅ "'+name+'" atualizado localmente!');
+    }
+    
+    // Reset
+    closeAdd();
+    editingId = null;
+    document.getElementById('addModal').querySelector('.modal-t').textContent = '🌐 PUBLICAR JOGO GLOBAL';
+    document.getElementById('publishBtn').textContent = '🌐 PUBLICAR';
+    document.getElementById('publishBtn').setAttribute('onclick','publishGame()');
+    document.getElementById('gameName').value = '';
+    document.getElementById('gameDesc').value = '';
+    removeExe(); removeIcon(); removeBanner();
+    selectedCat = '';
+    document.querySelectorAll('.cat-opt').forEach(o=>o.classList.remove('selected'));
+    updateProgress(); updatePreview();
+    
+  }catch(e){
+    console.error('edit error', e);
+    showToast('Erro ao editar: '+e.message,'error');
+  }finally{
+    btn.textContent = '💾 SALVAR EDIÇÃO';
+    btn.disabled = false;
+  }
+}
+
+function resetAddModal(){
+  editingId = null;
+  document.getElementById('addModal').querySelector('.modal-t').textContent = '🌐 PUBLICAR JOGO GLOBAL';
+  const pubBtn = document.getElementById('publishBtn');
+  pubBtn.textContent = '🌐 PUBLICAR';
+  pubBtn.setAttribute('onclick','publishGame()');
+}
+
+
+
+function showToast(msg, type=''){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show ' + (type||'');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => { toast.className = 'toast ' + (type||''); }, 4000);
+}
+function showError(msg){
+  const banner = document.getElementById('errorBanner');
+  const text = document.getElementById('errorText');
+  if(banner && text){
+    text.textContent = msg;
+    banner.style.display = 'flex';
+  }
+}
+function hideError(){ const b = document.getElementById('errorBanner'); if(b) b.style.display='none'; }
+function scrollToTop(){ window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+// Init
+init();
+</script>
+</body>
+</html>

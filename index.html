@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A CASA DO GAMER - MULTIPLAYER FINAL</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#020a1a;--card:#071530;--cyan:#00f5ff;--green:#00ffc8;--purple:#8a2be2;--pink:#ff7aff;--orange:#ff9f00}
+body{background:var(--bg);color:#fff;font-family:'Rajdhani',sans-serif;min-height:100vh}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px));background-size:40px 40px;pointer-events:none}
+header{position:sticky;top:0;z-index:100;background:rgba(2,10,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,245,255,0.2);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.logo{font-family:'Orbitron';font-weight:900;font-size:20px;color:var(--cyan);text-shadow:0 0 10px var(--cyan);line-height:1}
+.logo span{color:#fff;display:block;font-size:10px;letter-spacing:3px;margin-top:2px;opacity:0.7}
+.logo b{color:var(--green)}
+.search-box{flex:1;max-width:350px;position:relative}
+.search-box input{width:100%;padding:10px 16px 10px 40px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;font-family:'Rajdhani';font-size:14px;outline:none}
+.search-box::before{content:'🔍';position:absolute;left:14px;top:50%;transform:translateY(-50%)}
+.header-actions{display:flex;gap:10px;align-items:center}
+.btn{padding:10px 18px;border-radius:10px;border:none;font-family:'Orbitron';font-weight:700;font-size:11px;cursor:pointer;transition:all 0.2s;letter-spacing:1px}
+.btn-login{background:transparent;border:1px solid var(--cyan);color:var(--cyan)}
+.btn-add{background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;box-shadow:0 0 15px rgba(0,245,255,0.4)}
+.avatar-btn{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(0,245,255,0.3);padding:6px 12px 6px 6px;border-radius:30px;cursor:pointer}
+.avatar-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron';font-weight:900;font-size:14px;color:#000}
+.status{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.6)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.categories{padding:14px 20px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid rgba(255,255,255,0.05)}
+.categories::-webkit-scrollbar{display:none}
+.cat-btn{white-space:nowrap;padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.7);font-family:'Rajdhani';font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.2s}
+.cat-btn.active{color:#000;font-weight:700;transform:scale(1.05)}
+.cat-btn.active[data-cat="Todos"]{background:var(--cyan);border-color:var(--cyan)}
+.cat-btn.active[data-cat="RPG"]{background:#ff9f00;border-color:#ff9f00}
+.cat-btn.active[data-cat="Plataforma"]{background:#ff3b3b;border-color:#ff3b3b}
+.cat-btn.active[data-cat="Ação"]{background:#ff0055;border-color:#ff0055}
+.cat-btn.active[data-cat="Aventura"]{background:#00ff88;border-color:#00ff88}
+.cat-btn.active[data-cat="FPS"]{background:#ff4400;border-color:#ff4400}
+.cat-btn.active[data-cat="Battle Royale"]{background:#ffd700;border-color:#ffd700}
+.cat-btn.active[data-cat="Corrida"]{background:#00f5ff;border-color:#00f5ff}
+.cat-btn.active[data-cat="Esporte"]{background:#00ffc8;border-color:#00ffc8}
+.cat-btn.active[data-cat="Estratégia"]{background:#8a2be2;border-color:#8a2be2;color:#fff}
+.cat-btn.active[data-cat="Terror"]{background:#9900ff;border-color:#9900ff;color:#fff}
+.cat-btn.active[data-cat="Sandbox"]{background:#ff7aff;border-color:#ff7aff}
+.cat-btn.active[data-cat="Luta"]{background:#ff6600;border-color:#ff6600}
+main{padding:20px;max-width:1400px;margin:0 auto}
+.banner{padding:12px 16px;border-radius:12px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:13px}
+.banner.multi{background:linear-gradient(135deg, rgba(0,245,255,0.1), rgba(0,255,200,0.1));border:1px solid rgba(0,245,255,0.2)}
+.banner.setup{background:rgba(255,159,0,0.08);border:1px solid rgba(255,159,0,0.3);display:none}
+.empty-state{text-align:center;padding:60px 20px}
+.empty-icon{font-size:70px;margin-bottom:16px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.empty-title{font-family:'Orbitron';font-size:24px;font-weight:900;letter-spacing:2px;margin-bottom:10px}
+.empty-sub{color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:24px;line-height:1.5}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.game-card{background:var(--card);border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;transition:all 0.3s}
+.game-card:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 8px 24px rgba(0,245,255,0.15)}
+.game-banner{height:150px;background:#0a1a3a;display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden}
+.game-banner img{width:100%;height:100%;object-fit:cover}
+.game-content{padding:12px}
+.game-header{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.game-icon{width:44px;height:44px;border-radius:10px;background:rgba(0,245,255,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;flex-shrink:0}
+.game-icon img{width:100%;height:100%;object-fit:cover}
+.game-name{font-family:'Orbitron';font-weight:700;font-size:13px;line-height:1.2;flex:1}
+.game-cat{font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(0,255,200,0.15);color:var(--green);border:1px solid rgba(0,255,200,0.3)}
+.game-desc{font-size:12px;color:rgba(255,255,255,0.6);line-height:1.3;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:32px}
+.game-meta{display:flex;gap:10px;font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:10px}
+.btn-download{width:100%;padding:9px;background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;border:none;border-radius:8px;font-family:'Orbitron';font-weight:700;font-size:11px;cursor:pointer}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal-overlay.active{display:flex}
+.modal{background:rgba(7,21,48,0.98);border:1px solid rgba(0,245,255,0.3);border-radius:18px;width:100%;max-width:600px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,245,255,0.2)}
+.modal-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-family:'Orbitron';font-weight:900;font-size:14px;letter-spacing:1px}
+.modal-close{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;cursor:pointer}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.progress-bar{height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-bottom:16px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));width:0%;transition:width 0.3s}
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.7);margin-bottom:5px;display:block;font-family:'Orbitron'}
+.form-input, .form-textarea{width:100%;padding:11px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:9px;color:#fff;font-family:'Rajdhani';font-size:13px;outline:none}
+.form-input:focus, .form-textarea:focus{border-color:var(--cyan)}
+.form-textarea{resize:none;height:70px}
+.char-count{font-size:10px;color:rgba(255,255,255,0.4);text-align:right;margin-top:3px}
+.file-drop{border:2px dashed var(--cyan);border-radius:12px;padding:18px;text-align:center;background:rgba(0,245,255,0.03);cursor:pointer;position:relative}
+.file-drop.purple{border-color:var(--purple)} .file-drop.pink{border-color:var(--pink)}
+.file-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.file-info{margin-top:10px;padding:10px;background:rgba(0,255,200,0.08);border:1px solid rgba(0,255,200,0.2);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:12px}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cat-option{padding:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);border-radius:8px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s}
+.cat-option.selected{background:var(--green);color:#000;border-color:var(--green);box-shadow:0 0 10px var(--green);font-weight:700}
+.modal-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:10px;justify-content:flex-end}
+.btn-cancel{background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);padding:9px 18px;border-radius:8px;font-family:'Orbitron';font-size:11px;cursor:pointer}
+.btn-publish{background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;padding:9px 20px;border-radius:8px;border:none;font-family:'Orbitron';font-weight:700;font-size:11px;cursor:pointer}
+.btn-publish:disabled{opacity:0.4;cursor:not-allowed}
+.tabs{display:flex;gap:6px;margin-bottom:16px;background:rgba(255,255,255,0.03);padding:3px;border-radius:10px}
+.tab{flex:1;padding:9px;border-radius:7px;border:none;background:transparent;color:rgba(255,255,255,0.5);font-family:'Orbitron';font-weight:700;font-size:11px;cursor:pointer}
+.tab.active{background:var(--cyan);color:#000}
+.input-group{position:relative}
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer}
+.strength-bar{height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:6px;overflow:hidden}
+.strength-fill{height:100%;width:0%;transition:all 0.3s}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(100px);background:#071530;border:1px solid var(--cyan);color:#fff;padding:12px 20px;border-radius:10px;font-family:'Rajdhani';font-weight:600;font-size:13px;z-index:2000;transition:transform 0.3s;box-shadow:0 8px 24px rgba(0,0,0,0.5);max-width:90%;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.error{border-color:#ff3b3b;color:#ff9999}
+footer{text-align:center;padding:24px 20px;color:rgba(255,255,255,0.3);font-size:11px;letter-spacing:1px;border-top:1px solid rgba(255,255,255,0.05);margin-top:30px}
+.guide{background:#0a0a1a;border:1px solid rgba(255,159,0,0.2);border-radius:14px;padding:20px;margin:20px auto;max-width:900px;font-size:13px;line-height:1.7}
+.guide h3{font-family:Orbitron;color:#ff9f00;margin-bottom:10px}
+.guide code{background:#000;padding:2px 6px;border-radius:4px;font-size:12px;color:var(--cyan)}
+.guide a{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<header>
+<div class="logo">A CASA DO GAMER<span>MULTIPLAYER FINAL • <b id="serverStatus">CARREGANDO...</b></span></div>
+<div class="search-box"><input id="searchInput" type="text" placeholder="Buscar jogos de TODOS..."></div>
+<div class="header-actions">
+<div class="status"><div class="dot" id="statusDot"></div><span id="onlineCount">0 jogos</span></div>
+<button id="loginBtn" class="btn btn-login">ENTRAR</button>
+<button id="addBtn" class="btn btn-add" style="display:none">+ ADD JOGO</button>
+<div id="userMenu" style="display:none" class="avatar-btn" onclick="toggleProfile()"><div id="userAvatar" class="avatar-circle" style="background:var(--cyan)">U</div><span id="userName" style="font-family:Orbitron;font-size:11px;font-weight:700"></span></div>
+</div>
+</header>
+
+<div class="categories" id="categories">
+<button class="cat-btn active" data-cat="Todos">🎮 Todos <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="RPG">⚔️ RPG <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Plataforma">🍄 Plataforma <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Ação">💥 Ação <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Aventura">🗺️ Aventura <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="FPS">🔫 FPS <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Battle Royale">👑 Royale <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Corrida">🏎️ Corrida <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Esporte">⚽ Esporte <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Estratégia">🧠 Estratégia <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Terror">👻 Terror <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Sandbox">🧱 Sandbox <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Luta">👊 Luta <span class="count">(0)</span></button>
+</div>
+
+<main>
+<div id="setupBanner" class="banner setup"><div class="dot" style="background:#ff9f00;box-shadow:0 0 8px #ff9f00"></div><div id="setupText"></div></div>
+<div class="banner multi"><div class="dot"></div><div><b id="bannerText">🌐 MODO MULTIPLAYER</b> — <span id="bannerSub">Todos veem os jogos de todos em tempo real!</span></div></div>
+
+<div id="emptyState" class="empty-state">
+<div class="empty-icon">🌐</div>
+<div class="empty-title">MULTIPLAYER GLOBAL</div>
+<div class="empty-sub" id="emptySub">Carregando jogos da comunidade global...</div>
+<button id="emptyAction" class="btn btn-add" style="padding:12px 24px">🌐 ADICIONAR PRIMEIRO JOGO GLOBAL</button>
+</div>
+<div id="gamesGrid" class="games-grid" style="display:none"></div>
+</main>
+
+<div class="guide" id="guideBox">
+<h3>🔥 COMO ATIVAR MULTIPLAYER REAL (FUNCIONA 100% NO GITHUB PAGES)</h3>
+<p><b>Seu site está em MODO DEMO até você configurar (só você vê). Para virar multiplayer real onde TODOS veem:</b></p>
+<ol style="margin:12px 0 12px 20px">
+<li>Vá em <a href="https://supabase.com" target="_blank">supabase.com</a> > Sign Up grátis > New Project > Nome: <code>a-casa-do-gamer</code> > senha qualquer > Create</li>
+<li>Espera 2 min criar > Menu lateral <b>SQL Editor</b> > New Query > Cole isso e clica RUN:
+<br><code>create table games (id uuid default gen_random_uuid() primary key, name text, description text, category text, file_ext text, size text, rating text, downloads int default 0, icon_data text, banner_data text, author text, created_at timestamp default now());<br>alter table games enable row level security;<br>create policy "public" on games for all using (true) with check (true);</code>
+</li>
+<li>Menu <b>Project Settings > API</b> > Copie <code>Project URL</code> e <code>anon public key</code></li>
+<li>Neste arquivo <code>index.html</code> procure linha 300 onde tem:
+<br><code>const SUPABASE_URL = "SUA_URL_AQUI"</code><br>e <code>const SUPABASE_KEY = "SUA_KEY_AQUI"</code><br>Substitua pelos seus e faça commit no GitHub!</li>
+<li>Pronto! Agora multiplayer real global! 🌐</li>
+</ol>
+<p><b>Por que Supabase e não Firebase?</b> Supabase é mais simples, grátis, sem cartão, e funciona melhor no GitHub Pages. 500MB grátis.</p>
+<p style="margin-top:8px;color:rgba(255,255,255,0.5)">Dica: Para arquivos .EXE/.APK grandes, ative Storage no Supabase (Bucket public). No código atual, ícone e banner já vão para o banco como base64 (funciona até 2MB por imagem). Para jogos grandes, use link externo ou Storage.</p>
+</div>
+
+<footer>🌐 MULTIPLAYER GLOBAL • 666Studio804 • Versão Final Metaya • Todos veem todos os jogos</footer>
+
+<!-- MODAL LOGIN -->
+<div id="loginModal" class="modal-overlay"><div class="modal" style="max-width:380px"><div class="modal-header"><div class="modal-title">LOGIN MULTIPLAYER GLOBAL</div><button class="modal-close" onclick="closeLogin()">✕</button></div><div class="modal-body">
+<div class="tabs"><button class="tab active" id="tabLogin" onclick="switchTab('login')">ENTRAR</button><button class="tab" id="tabRegister" onclick="switchTab('register')">CRIAR CONTA</button></div>
+<div id="loginForm"><div class="form-group"><label class="form-label">EMAIL</label><input id="loginEmail" class="form-input" type="email" placeholder="seu@email.com"></div><div class="form-group"><label class="form-label">SENHA</label><div class="input-group"><input id="loginPass" class="form-input" type="password" placeholder="••••••••"><button class="eye-btn" onclick="toggleEye('loginPass')">👁️</button></div></div><button class="btn-publish" style="width:100%" onclick="doLogin()">ENTRAR NO MULTIPLAYER</button></div>
+<div id="registerForm" style="display:none"><div class="form-group"><label class="form-label">NOME GAMER</label><input id="regName" class="form-input" type="text" placeholder="Ex: 666Studio804" maxlength="20" oninput="checkStrength()"></div><div class="form-group"><label class="form-label">EMAIL</label><input id="regEmail" class="form-input" type="email" placeholder="seu@email.com"></div><div class="form-group"><label class="form-label">SENHA</label><div class="input-group"><input id="regPass" class="form-input" type="password" placeholder="Mín 6" oninput="checkStrength()"><button class="eye-btn" onclick="toggleEye('regPass')">👁️</button></div><div class="strength-bar"><div id="strengthFill" class="strength-fill"></div></div><div id="strengthText" style="font-size:10px;margin-top:4px"></div></div><div class="form-group"><label class="form-label">CONFIRMAR SENHA</label><input id="regPass2" class="form-input" type="password" placeholder="Repita"></div><button class="btn-publish" style="width:100%" onclick="doRegister()">CRIAR CONTA GLOBAL</button></div>
+</div></div></div>
+
+<!-- ADD MODAL -->
+<div id="addModal" class="modal-overlay"><div class="modal"><div class="modal-header"><div class="modal-title">🌐 ADICIONAR JOGO PARA TODO MUNDO VER</div><button class="modal-close" onclick="closeAdd()">✕</button></div><div style="padding:0 20px"><div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div></div><div class="modal-body">
+<div class="form-group"><label class="form-label">1_ NOME DO JOGO *</label><input id="gameName" class="form-input" type="text" placeholder="Ex: Elden Ring Legends" maxlength="50" oninput="updateProgress();updatePreview()"><div class="char-count"><span id="nameCount">0</span>/50</div></div>
+<div class="form-group"><label class="form-label">2_ DESCRIÇÃO *</label><textarea id="gameDesc" class="form-textarea" placeholder="Descrição que TODA comunidade verá..." maxlength="200" oninput="updateProgress();updatePreview()"></textarea><div class="char-count"><span id="descCount">0</span>/200</div></div>
+<div class="form-group"><label class="form-label">3_ ARQUIVO .EXE / .APK *</label><div class="file-drop"><div>📦 Clique - Será baixado por todos</div><div style="font-size:10px;opacity:0.5;margin-top:4px">Max 100MB • .EXE e .APK • Visível global</div><input id="fileExe" type="file" accept=".exe,.apk" onchange="handleExe(this)"></div><div id="exeInfo" style="display:none"></div></div>
+<div class="form-group"><label class="form-label">4_ ÍCONE *</label><div class="file-drop purple"><div>🖼️ Ícone global</div><input id="fileIcon" type="file" accept="image/*" onchange="handleIcon(this)"></div><div id="iconInfo" style="display:none"></div></div>
+<div class="form-group"><label class="form-label">5_ BANNER *</label><div class="file-drop pink"><div>🎬 Banner global</div><input id="fileBanner" type="file" accept="image/*" onchange="handleBanner(this)"></div><div id="bannerInfo" style="display:none"></div></div>
+<div class="form-group"><label class="form-label">6_ CATEGORIA *</label><div class="cat-grid"><div class="cat-option" data-cat="RPG" onclick="selectCat(this)">⚔️ RPG</div><div class="cat-option" data-cat="Plataforma" onclick="selectCat(this)">🍄 Plataforma</div><div class="cat-option" data-cat="Ação" onclick="selectCat(this)">💥 Ação</div><div class="cat-option" data-cat="Aventura" onclick="selectCat(this)">🗺️ Aventura</div><div class="cat-option" data-cat="FPS" onclick="selectCat(this)">🔫 FPS</div><div class="cat-option" data-cat="Battle Royale" onclick="selectCat(this)">👑 Royale</div><div class="cat-option" data-cat="Corrida" onclick="selectCat(this)">🏎️ Corrida</div><div class="cat-option" data-cat="Esporte" onclick="selectCat(this)">⚽ Esporte</div><div class="cat-option" data-cat="Estratégia" onclick="selectCat(this)">🧠 Estratégia</div><div class="cat-option" data-cat="Terror" onclick="selectCat(this)">👻 Terror</div><div class="cat-option" data-cat="Sandbox" onclick="selectCat(this)">🧱 Sandbox</div><div class="cat-option" data-cat="Luta" onclick="selectCat(this)">👊 Luta</div></div></div>
+<div class="form-group" style="background:rgba(0,245,255,0.05);border:1px solid rgba(0,245,255,0.1);border-radius:10px;padding:10px"><div class="form-label">👁️ COMO TODOS VERÃO</div><div id="livePreview" class="game-card"><div class="game-banner" id="previewBanner" style="height:90px">🎮</div><div class="game-content"><div class="game-header"><div class="game-icon" id="previewIcon">🎮</div><div><div class="game-name" id="previewName">Nome do Jogo</div><div class="game-cat" id="previewCat">Categoria</div></div></div><div class="game-desc" id="previewDesc">Descrição...</div></div></div></div>
+</div><div class="modal-footer"><button class="btn-cancel" onclick="closeAdd()">CANCELAR</button><button id="publishBtn" class="btn-publish" disabled onclick="publishGame()">🌐 PUBLICAR GLOBAL</button></div></div></div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ================= CONFIGURE AQUI SEU SUPABASE =================
+// 1. Crie projeto em supabase.com
+// 2. Copie URL e anon key e cole aqui
+const SUPABASE_URL = "SUA_URL_AQUI";
+const SUPABASE_KEY = "SUA_KEY_AQUI";
+// ==============================================================
+
+let supabaseClient = null;
+let useSupabase = false;
+let games = [];
+let currentUser = JSON.parse(localStorage.getItem('metaya_user') || 'null');
+let selectedCat='', exeFile=null, iconFile=null, bannerFile=null, iconDataUrl='', bannerDataUrl='', activeFilter='Todos', isPublishing=false;
+
+function initSupabase(){
+  if(SUPABASE_URL !== "SUA_URL_AQUI" && SUPABASE_KEY !== "SUA_KEY_AQUI" && SUPABASE_URL.startsWith("http")){
+    try{
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      useSupabase = true;
+      document.getElementById('serverStatus').textContent='MULTIPLAYER ON';
+      document.getElementById('serverStatus').style.color='#00ffc8';
+      document.getElementById('bannerText').textContent='🌐 MULTIPLAYER GLOBAL ATIVO';
+      document.getElementById('bannerSub').textContent='Supabase conectado! Todos veem os jogos de todos em tempo real!';
+      document.getElementById('setupBanner').style.display='none';
+      startRealtime();
+      return;
+    }catch(e){console.error(e)}
+  }
+  // MODO DEMO
+  useSupabase=false;
+  document.getElementById('serverStatus').textContent='MODO DEMO';
+  document.getElementById('serverStatus').style.color='#ff9f00';
+  document.getElementById('setupBanner').style.display='flex';
+  document.getElementById('setupText').innerHTML='<b>MODO DEMO LOCAL:</b> Só você vê seus jogos. Configure Supabase (5 min, grátis) para multiplayer real global! Veja guia abaixo.';
+  document.getElementById('bannerText').textContent='⚠️ MODO DEMO - Configure Supabase para multiplayer real';
+  document.getElementById('bannerSub').textContent='Guia de configuração abaixo - 5 minutos, grátis';
+  games = JSON.parse(localStorage.getItem('metaya_games_multi')||'[]');
+  renderGames();
+}
+
+async function startRealtime(){
+  await loadGames();
+  // Realtime subscription
+  supabaseClient.channel('games-changes').on('postgres_changes',{event:'*',schema:'public',table:'games'},payload=>{
+    loadGames();
+  }).subscribe();
+  // Polling fallback a cada 5s
+  setInterval(loadGames, 5000);
+}
+
+async function loadGames(){
+  try{
+    const {data, error} = await supabaseClient.from('games').select('*').order('created_at',{ascending:false});
+    if(error) throw error;
+    games = data.map(d=>({
+      id:d.id,
+      name:d.name,
+      desc:d.description,
+      category:d.category,
+      fileExt:d.file_ext,
+      size:d.size,
+      rating:d.rating,
+      downloads:d.downloads,
+      iconData:d.icon_data,
+      bannerData:d.banner_data,
+      author:d.author,
+      createdAt:d.created_at
+    }));
+    renderGames();
+    showToast('🌐 '+games.length+' jogos carregados da comunidade global!');
+  }catch(e){
+    console.error('Erro loadGames', e);
+    showToast('Erro ao carregar jogos: '+e.message,'error');
+  }
+}
+
+function setupEvents(){
+  document.getElementById('searchInput').addEventListener('input', renderGames);
+  document.querySelectorAll('.cat-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter=btn.dataset.cat;
+      renderGames();
+    });
+  });
+  document.getElementById('loginBtn').addEventListener('click', openLogin);
+  document.getElementById('addBtn').addEventListener('click', openAdd);
+  document.getElementById('emptyAction').addEventListener('click', ()=>{
+    if(currentUser) openAdd(); else openLogin();
+  });
+}
+
+function updateUI(){
+  if(currentUser){
+    document.getElementById('loginBtn').style.display='none';
+    document.getElementById('addBtn').style.display='inline-block';
+    document.getElementById('userMenu').style.display='flex';
+    document.getElementById('userName').textContent=currentUser.name;
+    document.getElementById('userAvatar').textContent=currentUser.name.charAt(0).toUpperCase();
+    document.getElementById('userAvatar').style.background=currentUser.color||'#00f5ff';
+    document.getElementById('emptyAction').textContent='🌐 ADICIONAR JOGO GLOBAL';
+  } else {
+    document.getElementById('loginBtn').style.display='inline-block';
+    document.getElementById('addBtn').style.display='none';
+    document.getElementById('userMenu').style.display='none';
+  }
+  updateCounts();
+}
+
+function updateCounts(){
+  document.querySelectorAll('.cat-btn').forEach(btn=>{
+    const cat=btn.dataset.cat;
+    const count = cat==='Todos' ? games.length : games.filter(g=>g.category===cat).length;
+    btn.querySelector('.count').textContent='('+count+')';
+  });
+  document.getElementById('onlineCount').textContent=games.length+' jogos • Global';
+}
+
+function renderGames(){
+  const grid=document.getElementById('gamesGrid');
+  const empty=document.getElementById('emptyState');
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  let filtered=games.filter(g=>{
+    const matchSearch=g.name.toLowerCase().includes(search) || (g.desc||'').toLowerCase().includes(search);
+    const matchCat=activeFilter==='Todos' || g.category===activeFilter;
+    return matchSearch && matchCat;
+  });
+  if(filtered.length===0){
+    grid.style.display='none';
+    empty.style.display='block';
+    if(search || activeFilter!=='Todos'){
+      empty.querySelector('.empty-title').textContent='NENHUM RESULTADO';
+      document.getElementById('emptySub').textContent='Nenhum jogo para "'+(search||activeFilter)+'"';
+    } else {
+      empty.querySelector('.empty-title').textContent=games.length===0 ? 'NENHUM JOGO GLOBAL AINDA' : 'VAZIO';
+      document.getElementById('emptySub').innerHTML = games.length===0 ? (useSupabase ? 'Seja o PRIMEIRO do mundo a adicionar um jogo!<br>Todos verão em tempo real!' : 'Modo demo: só você vê.<br>Configure Supabase para global!') : 'Nenhum jogo nesta categoria';
+    }
+  } else {
+    empty.style.display='none';
+    grid.style.display='grid';
+    grid.innerHTML=filtered.map(g=>`
+      <div class="game-card">
+        <div class="game-banner">${g.bannerData ? `<img src="${g.bannerData}">` : '🎮'}</div>
+        <div class="game-content">
+          <div class="game-header"><div class="game-icon">${g.iconData ? `<img src="${g.iconData}">` : '🎮'}</div><div style="flex:1"><div class="game-name">${g.name}</div><div style="display:flex;gap:4px;margin-top:2px"><span class="game-cat">${g.category}</span><span style="font-size:9px;color:rgba(255,255,255,0.4)">${g.author||'Anônimo'}</span></div></div></div>
+          <div class="game-desc">${g.desc||''}</div>
+          <div class="game-meta"><span>⭐ ${g.rating||'4.8'}</span><span>📦 ${g.size||'?'}</span><span>⬇️ ${g.downloads||0}</span></div>
+          <button class="btn-download" onclick="downloadGame('${g.id}')">⬇️ BAIXAR ${g.fileExt||'GAME'}</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  updateCounts();
+}
+
+function openLogin(){document.getElementById('loginModal').classList.add('active')}
+function closeLogin(){document.getElementById('loginModal').classList.remove('active')}
+function switchTab(t){document.getElementById('tabLogin').classList.toggle('active',t==='login');document.getElementById('tabRegister').classList.toggle('active',t==='register');document.getElementById('loginForm').style.display=t==='login'?'block':'none';document.getElementById('registerForm').style.display=t==='register'?'block':'none';}
+function toggleEye(id){const el=document.getElementById(id);el.type=el.type==='password'?'text':'password';}
+function checkStrength(){const pass=document.getElementById('regPass').value;const fill=document.getElementById('strengthFill');const text=document.getElementById('strengthText');let score=0;if(pass.length>=6)score++;if(pass.length>=8)score++;if(/[A-Z]/.test(pass)&&/[0-9]/.test(pass))score++;if(/[^A-Za-z0-9]/.test(pass))score++;const widths=['0%','33%','66%','100%'];const colors=['transparent','#ff3b3b','#ffaa00','#00ffc8'];const labels=['','Fraca','Média','Forte'];fill.style.width=widths[score]||'0%';fill.style.background=colors[score]||'transparent';text.textContent=labels[score]||'';text.style.color=colors[score]||'rgba(255,255,255,0.5)';}
+function doLogin(){const email=document.getElementById('loginEmail').value;const pass=document.getElementById('loginPass').value;if(!email||!pass)return showToast('Preencha email e senha','error');const users=JSON.parse(localStorage.getItem('metaya_users')||'[]');const user=users.find(u=>u.email===email&&u.pass===pass);if(!user)return showToast('Email ou senha incorretos','error');currentUser=user;localStorage.setItem('metaya_user',JSON.stringify(user));closeLogin();updateUI();renderGames();showToast('🌐 Bem-vindo ao multiplayer global, '+user.name+'!');}
+function doRegister(){const name=document.getElementById('regName').value.trim();const email=document.getElementById('regEmail').value.trim();const pass=document.getElementById('regPass').value;const pass2=document.getElementById('regPass2').value;if(name.length<3)return showToast('Nome mínimo 3','error');if(!email.includes('@'))return showToast('Email inválido','error');if(pass.length<6)return showToast('Senha mínimo 6','error');if(pass!==pass2)return showToast('Senhas não coincidem','error');const users=JSON.parse(localStorage.getItem('metaya_users')||'[]');if(users.find(u=>u.email===email))return showToast('Email já cadastrado','error');const colors=['#00f5ff','#00ffc8','#8a2be2','#ff7aff','#ffd700'];const user={id:Date.now().toString(),name,email,pass,color:colors[Math.floor(Math.random()*colors.length)]};users.push(user);localStorage.setItem('metaya_users',JSON.stringify(users));currentUser=user;localStorage.setItem('metaya_user',JSON.stringify(user));closeLogin();updateUI();renderGames();showToast('🌐 Conta global criada! '+name+'!');}
+function toggleProfile(){if(confirm('Sair da conta '+currentUser.name+'?')){currentUser=null;localStorage.removeItem('metaya_user');updateUI();renderGames();showToast('Você saiu');}}
+function openAdd(){if(!currentUser)return openLogin();document.getElementById('addModal').classList.add('active');}
+function closeAdd(){document.getElementById('addModal').classList.remove('active');}
+function updateProgress(){let f=0;if(document.getElementById('gameName').value.trim().length>=3)f++;if(document.getElementById('gameDesc').value.trim().length>=10)f++;if(exeFile)f++;if(iconFile)f++;if(bannerFile)f++;if(selectedCat)f++;document.getElementById('progressFill').style.width=(f/6*100)+'%';document.getElementById('nameCount').textContent=document.getElementById('gameName').value.length;document.getElementById('descCount').textContent=document.getElementById('gameDesc').value.length;document.getElementById('publishBtn').disabled=f<6||isPublishing;}
+function updatePreview(){document.getElementById('previewName').textContent=document.getElementById('gameName').value||'Nome do Jogo';document.getElementById('previewDesc').textContent=document.getElementById('gameDesc').value||'Descrição...';document.getElementById('previewCat').textContent=selectedCat||'Categoria';if(iconDataUrl)document.getElementById('previewIcon').innerHTML=`<img src="${iconDataUrl}">`;if(bannerDataUrl)document.getElementById('previewBanner').innerHTML=`<img src="${bannerDataUrl}">`;}
+function handleExe(input){const file=input.files[0];if(!file)return;const ext=file.name.toLowerCase().split('.').pop();if(ext!=='exe'&&ext!=='apk')return showToast('Só .EXE e .APK!','error');exeFile=file;document.getElementById('exeInfo').style.display='block';document.getElementById('exeInfo').innerHTML=`<div class="file-info"><span>${ext==='exe'?'🟦':'🤖'}</span><div style="flex:1"><div style="font-weight:700">${file.name}</div><div style="font-size:10px;opacity:0.7">${(file.size/1024/1024).toFixed(2)} MB • ${ext.toUpperCase()} • Global</div></div><button onclick="removeExe()" style="background:none;border:none;color:#fff;cursor:pointer">✕</button></div>`;updateProgress();}
+function removeExe(){exeFile=null;document.getElementById('exeInfo').style.display='none';document.getElementById('fileExe').value='';updateProgress();}
+function handleIcon(input){const file=input.files[0];if(!file)return;iconFile=file;const r=new FileReader();r.onload=e=>{iconDataUrl=e.target.result;document.getElementById('iconInfo').style.display='block';document.getElementById('iconInfo').innerHTML=`<div style="display:flex;align-items:center;gap:8px"><img src="${iconDataUrl}" style="width:50px;height:50px;border-radius:8px;object-fit:cover"><div style="flex:1;font-size:11px">${file.name}</div><button onclick="removeIcon()" style="background:none;border:none;color:#fff;cursor:pointer">✕</button></div>`;updateProgress();updatePreview();};r.readAsDataURL(file);}
+function removeIcon(){iconFile=null;iconDataUrl='';document.getElementById('iconInfo').style.display='none';document.getElementById('fileIcon').value='';updateProgress();updatePreview();}
+function handleBanner(input){const file=input.files[0];if(!file)return;bannerFile=file;const r=new FileReader();r.onload=e=>{bannerDataUrl=e.target.result;document.getElementById('bannerInfo').style.display='block';document.getElementById('bannerInfo').innerHTML=`<div style="display:flex;align-items:center;gap:8px"><img src="${bannerDataUrl}" style="width:80px;height:45px;border-radius:6px;object-fit:cover"><div style="flex:1;font-size:11px">${file.name}</div><button onclick="removeBanner()" style="background:none;border:none;color:#fff;cursor:pointer">✕</button></div>`;updateProgress();updatePreview();};r.readAsDataURL(file);}
+function removeBanner(){bannerFile=null;bannerDataUrl='';document.getElementById('bannerInfo').style.display='none';document.getElementById('fileBanner').value='';updateProgress();updatePreview();}
+function selectCat(el){document.querySelectorAll('.cat-option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');selectedCat=el.dataset.cat;updateProgress();updatePreview();}
+
+async function publishGame(){
+  if(isPublishing) return;
+  if(!exeFile||!iconFile||!bannerFile||!selectedCat) return;
+  isPublishing=true;
+  const btn=document.getElementById('publishBtn');
+  btn.textContent='🌐 PUBLICANDO GLOBAL...';
+  btn.disabled=true;
+  const name=document.getElementById('gameName').value.trim();
+  const desc=document.getElementById('gameDesc').value.trim();
+  const ext=exeFile.name.split('.').pop().toUpperCase();
+  const gameData={
+    name, description:desc, category:selectedCat,
+    file_ext:ext, size:(exeFile.size/1024/1024).toFixed(1)+' MB',
+    rating:(4.5+Math.random()*0.4).toFixed(1),
+    downloads:0,
+    icon_data:iconDataUrl,
+    banner_data:bannerDataUrl,
+    author:currentUser.name
+  };
+  try{
+    if(useSupabase){
+      const {data, error}=await supabaseClient.from('games').insert([gameData]).select();
+      if(error) throw error;
+      showToast('🌐 Jogo "'+name+'" publicado! TODO MUNDO já vê!');
+    } else {
+      const newGame={id:Date.now().toString(), name, desc, category:selectedCat, fileExt:ext, size:gameData.size, rating:gameData.rating, downloads:0, iconData:iconDataUrl, bannerData:bannerDataUrl, author:currentUser.name};
+      games.unshift(newGame);
+      localStorage.setItem('metaya_games_multi', JSON.stringify(games));
+      renderGames();
+      showToast('✅ Salvo local (demo). Configure Supabase para global!');
+    }
+    closeAdd();
+    document.getElementById('gameName').value=''; document.getElementById('gameDesc').value='';
+    removeExe();removeIcon();removeBanner(); selectedCat=''; document.querySelectorAll('.cat-option').forEach(o=>o.classList.remove('selected')); updateProgress();
+  }catch(e){console.error(e);showToast('Erro: '+e.message,'error');}
+  finally{isPublishing=false;btn.textContent='🌐 PUBLICAR GLOBAL';btn.disabled=false;updateProgress();}
+}
+
+async function downloadGame(id){
+  if(!currentUser) return openLogin();
+  const game=games.find(g=>g.id===id);
+  if(!game) return;
+  if(useSupabase){
+    try{await supabaseClient.from('games').update({downloads: (game.downloads||0)+1}).eq('id', id);}catch(e){}
+  } else {
+    game.downloads=(game.downloads||0)+1;
+    localStorage.setItem('metaya_games_multi', JSON.stringify(games));
+    renderGames();
+  }
+  showToast('⬇️ Download "'+game.name+'" iniciado!');
+}
+
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');setTimeout(()=>{t.className='toast '+(type||'');},3500);}
+
+initSupabase();
+setupEvents();
+updateUI();
+</script>
+</body>
+</html>

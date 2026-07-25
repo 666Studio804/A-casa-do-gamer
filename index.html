@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A CASA DO GAMER - MULTIPLAYER FINAL</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#020a1a;--card:#071530;--cyan:#00f5ff;--green:#00ffc8;--purple:#8a2be2;--pink:#ff7aff;--orange:#ff9f00}
+body{background:var(--bg);color:#fff;font-family:'Rajdhani',sans-serif;min-height:100vh}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px));background-size:40px 40px;pointer-events:none}
+header{position:sticky;top:0;z-index:100;background:rgba(2,10,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,245,255,0.2);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.logo{font-family:'Orbitron';font-weight:900;font-size:20px;color:var(--cyan);text-shadow:0 0 10px var(--cyan);line-height:1}
+.logo span{color:#fff;display:block;font-size:10px;letter-spacing:3px;margin-top:2px;opacity:0.7}
+.logo b{color:var(--green)}
+.search-box{flex:1;max-width:350px;position:relative}
+.search-box input{width:100%;padding:10px 16px 10px 40px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;font-family:'Rajdhani';font-size:14px;outline:none}
+.search-box::before{content:'🔍';position:absolute;left:14px;top:50%;transform:translateY(-50%)}
+.header-actions{display:flex;gap:10px;align-items:center}
+.btn{padding:10px 18px;border-radius:10px;border:none;font-family:'Orbitron';font-weight:700;font-size:11px;cursor:pointer;transition:all 0.2s;letter-spacing:1px}
+.btn-login{background:transparent;border:1px solid var(--cyan);color:var(--cyan)}
+.btn-add{background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;box-shadow:0 0 15px rgba(0,245,255,0.4)}
+.avatar-btn{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(0,245,255,0.3);padding:6px 12px 6px 6px;border-radius:30px;cursor:pointer}
+.avatar-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron';font-weight:900;font-size:14px;color:#000}
+.status{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.6)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.categories{padding:14px 20px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid rgba(255,255,255,0.05)}
+.categories::-webkit-scrollbar{display:none}
+.cat-btn{white-space:nowrap;padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.7);font-family:'Rajdhani';font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.2s}
+.cat-btn.active{color:#000;font-weight:700;transform:scale(1.05)}
+.cat-btn.active[data-cat="Todos"]{background:var(--cyan);border-color:var(--cyan)}
+.cat-btn.active[data-cat="RPG"]{background:#ff9f00;border-color:#ff9f00}
+.cat-btn.active[data-cat="Plataforma"]{background:#ff3b3b;border-color:#ff3b3b}
+.cat-btn.active[data-cat="Ação"]{background:#ff0055;border-color:#ff0055}
+.cat-btn.active[data-cat="Aventura"]{background:#00ff88;border-color:#00ff88}
+.cat-btn.active[data-cat="FPS"]{background:#ff4400;border-color:#ff4400}
+.cat-btn.active[data-cat="Battle Royale"]{background:#ffd700;border-color:#ffd700}
+.cat-btn.active[data-cat="Corrida"]{background:#00f5ff;border-color:#00f5ff}
+.cat-btn.active[data-cat="Esporte"]{background:#00ffc8;border-color:#00ffc8}
+.cat-btn.active[data-cat="Estratégia"]{background:#8a2be2;border-color:#8a2be2;color:#fff}
+.cat-btn.active[data-cat="Terror"]{background:#9900ff;border-color:#9900ff;color:#fff}
+.cat-btn.active[data-cat="Sandbox"]{background:#ff7aff;border-color:#ff7aff}
+.cat-btn.active[data-cat="Luta"]{background:#ff6600;border-color:#ff6600}
+main{padding:20px;max-width:1400px;margin:0 auto}
+.banner{padding:12px 16px;border-radius:12px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:13px}
+.banner.multi{background:linear-gradient(135deg, rgba(0,245,255,0.1), rgba(0,255,200,0.1));border:1px solid rgba(0,245,255,0.2)}
+.banner.setup{background:rgba(255,159,0,0.08);border:1px solid rgba(255,159,0,0.3);display:none}
+.empty-state{text-align:center;padding:60px 20px}
+.empty-icon{font-size:70px;margin-bottom:16px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.empty-title{font-family:'Orbitron';font-size:24px;font-weight:900;letter-spacing:2px;margin-bottom:10px}
+.empty-sub{color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:24px;line-height:1.5}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.game-card{background:var(--card);border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;transition:all 0.3s}
+.game-card:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 8px 24px rgba(0,245,255,0.15)}
+.game-banner{height:150px;background:#0a1a3a;display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden}
+.game-banner img{width:100%;height:100%;object-fit:cover}
+.game-content{padding:12px}
+.game-header{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.game-icon{width:44px;height:44px;border-radius:10px;background:rgba(0,245,255,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;flex-shrink:0}
+.game-icon img{width:100%;height:100%;object-fit:cover}
+.game-name{font-family:'Orbitron';font-weight:700;font-size:13px;line-height:1.2;flex:1}
+.game-cat{font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(0,255,200,0.15);color:var(--green);border:1px solid rgba(0,255,200,0.3)}
+.game-desc{font-size:12px;color:rgba(255,255,255,0.6);line-height:1.3;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:32px}
+.game-meta{display:flex;gap:10px;font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:10px}
+.btn-download{width:100%;padding:9px;background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;border:none;border-radius:8px;font-family:'Orbitron';font-weight:700;font-size:11px;cursor:pointer}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal-overlay.active{display:flex}
+.modal{background:rgba(7,21,48,0.98);border:1px solid rgba(0,245,255,0.3);border-radius:18px;width:100%;max-width:600px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,245,255,0.2)}
+.modal-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-family:'Orbitron';font-weight:900;font-size:14px;letter-spacing:1px}
+.modal-close{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;cursor:pointer}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.progress-bar{height:3px;background:rgba(255,255,255,0.05);border-radius:2px;margin-bottom:16px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));width:0%;transition:width 0.3s}
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.7);margin-bottom:5px;display:block;font-family:'Orbitron'}
+.form-input, .form-textarea{width:100%;padding:11px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:9px;color:#fff;font-family:'Rajdhani';font-size:13px;outline:none}
+.form-input:focus, .form-textarea:focus{border-color:var(--cyan)}
+.form-textarea{resize:none;height:70px}
+.char-count{font-size:10px;color:rgba(255,255,255,0.4);text-align:right;margin-top:3px}
+.file-drop{border:2px dashed var(--cyan);border-radius:12px;padding:18px;text-align:center;background:rgba(0,245,255,0.03);cursor:pointer;position:relative}
+.file-drop.purple{border-color:var(--purple)} .file-drop.pink{border-color:var(--pink)}
+.file-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.file-info{margin-top:10px;padding:10px;background:rgba(0,255,200,0.08);border:1px solid rgba(0,255,200,0.2);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:12px}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cat-option{padding:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);border-radius:8px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s}
+.cat-option.selected{background:var(--green);color:#000;border-color:var(--green);box-shadow:0 0 10px var(--green);font-weight:700}
+.modal-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:10px;justify-content:flex-end}
+.btn-cancel{background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);padding:9px 18px;border-radius:8px;font-family:'Orbitron';font-size:11px;cursor:pointer}
+.btn-publish{background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;padding:9px 20px;border-radius:8px;border:none;font-family:'Orbitron';font-weight:700;font-size:11px;cursor:pointer}
+.btn-publish:disabled{opacity:0.4;cursor:not-allowed}
+.tabs{display:flex;gap:6px;margin-bottom:16px;background:rgba(255,255,255,0.03);padding:3px;border-radius:10px}
+.tab{flex:1;padding:9px;border-radius:7px;border:none;background:transparent;color:rgba(255,255,255,0.5);font-family:'Orbitron';font-weight:700;font-size:11px;cursor:pointer}
+.tab.active{background:var(--cyan);color:#000}
+.input-group{position:relative}
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer}
+.strength-bar{height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:6px;overflow:hidden}
+.strength-fill{height:100%;width:0%;transition:all 0.3s}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(100px);background:#071530;border:1px solid var(--cyan);color:#fff;padding:12px 20px;border-radius:10px;font-family:'Rajdhani';font-weight:600;font-size:13px;z-index:2000;transition:transform 0.3s;box-shadow:0 8px 24px rgba(0,0,0,0.5);max-width:90%;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.error{border-color:#ff3b3b;color:#ff9999}
+footer{text-align:center;padding:24px 20px;color:rgba(255,255,255,0.3);font-size:11px;letter-spacing:1px;border-top:1px solid rgba(255,255,255,0.05);margin-top:30px}
+.guide{background:#0a0a1a;border:1px solid rgba(255,159,0,0.2);border-radius:14px;padding:20px;margin:20px auto;max-width:900px;font-size:13px;line-height:1.7}
+.guide h3{font-family:Orbitron;color:#ff9f00;margin-bottom:10px}
+.guide code{background:#000;padding:2px 6px;border-radius:4px;font-size:12px;color:var(--cyan)}
+.guide a{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<header>
+<div class="logo">A CASA DO GAMER<span>MULTIPLAYER FINAL • <b id="serverStatus">CARREGANDO...</b></span></div>
+<div class="search-box"><input id="searchInput" type="text" placeholder="Buscar jogos de TODOS..."></div>
+<div class="header-actions">
+<div class="status"><div class="dot" id="statusDot"></div><span id="onlineCount">0 jogos</span></div>
+<button id="loginBtn" class="btn btn-login">ENTRAR</button>
+<button id="addBtn" class="btn btn-add" style="display:none">+ ADD JOGO</button>
+<div id="userMenu" style="display:none" class="avatar-btn" onclick="toggleProfile()"><div id="userAvatar" class="avatar-circle" style="background:var(--cyan)">U</div><span id="userName" style="font-family:Orbitron;font-size:11px;font-weight:700"></span></div>
+</div>
+</header>
+
+<div class="categories" id="categories">
+<button class="cat-btn active" data-cat="Todos">🎮 Todos <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="RPG">⚔️ RPG <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Plataforma">🍄 Plataforma <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Ação">💥 Ação <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Aventura">🗺️ Aventura <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="FPS">🔫 FPS <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Battle Royale">👑 Royale <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Corrida">🏎️ Corrida <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Esporte">⚽ Esporte <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Estratégia">🧠 Estratégia <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Terror">👻 Terror <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Sandbox">🧱 Sandbox <span class="count">(0)</span></button>
+<button class="cat-btn" data-cat="Luta">👊 Luta <span class="count">(0)</span></button>
+</div>
+
+<main>
+<div id="setupBanner" class="banner setup"><div class="dot" style="background:#ff9f00;box-shadow:0 0 8px #ff9f00"></div><div id="setupText"></div></div>
+<div class="banner multi"><div class="dot"></div><div><b id="bannerText">🌐 MODO MULTIPLAYER</b> — <span id="bannerSub">Todos veem os jogos de todos em tempo real!</span></div></div>
+
+<div id="emptyState" class="empty-state">
+<div class="empty-icon">🌐</div>
+<div class="empty-title">MULTIPLAYER GLOBAL</div>
+<div class="empty-sub" id="emptySub">Carregando jogos da comunidade global...</div>
+<button id="emptyAction" class="btn btn-add" style="padding:12px 24px">🌐 ADICIONAR PRIMEIRO JOGO GLOBAL</button>
+</div>
+<div id="gamesGrid" class="games-grid" style="display:none"></div>
+</main>
+
+<div class="guide" id="guideBox">
+<h3>🔥 COMO ATIVAR MULTIPLAYER REAL (FUNCIONA 100% NO GITHUB PAGES)</h3>
+<p><b>Seu site está em MODO DEMO até você configurar (só você vê). Para virar multiplayer real onde TODOS veem:</b></p>
+<ol style="margin:12px 0 12px 20px">
+<li>Vá em <a href="https://supabase.com" target="_blank">supabase.com</a> > Sign Up grátis > New Project > Nome: <code>a-casa-do-gamer</code> > senha qualquer > Create</li>
+<li>Espera 2 min criar > Menu lateral <b>SQL Editor</b> > New Query > Cole isso e clica RUN:
+<br><code>create table games (id uuid default gen_random_uuid() primary key, name text, description text, category text, file_ext text, size text, rating text, downloads int default 0, icon_data text, banner_data text, author text, created_at timestamp default now());<br>alter table games enable row level security;<br>create policy "public" on games for all using (true) with check (true);</code>
+</li>
+<li>Menu <b>Project Settings > API</b> > Copie <code>Project URL</code> e <code>anon public key</code></li>
+<li>Neste arquivo <code>index.html</code> procure linha 300 onde tem:
+<br><code>const SUPABASE_URL = "https://veyksishutqussikyoug.supabase.co/rest/v1/"</code><br>e <code>const SUPABASE_KEY = "sb_publishable_6ocNLz8MC109uQq0TqXk8A_6IjDB4Ey"</code><br>Substitua pelos seus e faça commit no GitHub!</li>
+<li>Pronto! Agora multiplayer real global! 🌐</li>
+</ol>
+<p><b>Por que Supabase e não Firebase?</b> Supabase é mais simples, grátis, sem cartão, e funciona melhor no GitHub Pages. 500MB grátis.</p>
+<p style="margin-top:8px;color:rgba(255,255,255,0.5)">Dica: Para arquivos .EXE/.APK grandes, ative Storage no Supabase (Bucket public). No código atual, ícone e banner já vão para o banco como base64 (funciona até 2MB por imagem). Para jogos grandes, use link externo ou Storage.</p>
+</div>
+
+<footer>🌐 MULTIPLAYER GLOBAL • 666Studio804 • Versão Final Metaya • Todos veem todos os jogos</footer>
+
+<!-- MODAL LOGIN -->
+<div id="loginModal" class="modal-overlay"><div class="modal" style="max-width:380px"><div class="modal-header"><div class="modal-title">LOGIN MULTIPLAYER GLOBAL</div><button class="modal-close" onclick="closeLogin()">✕</button></div><div class="modal-body">
+<div class="tabs"><button class="tab active" id="tabLogin" onclick="switchTab('login')">ENTRAR</button><button class="tab" id="tabRegister" onclick="switchTab('register')">CRIAR CONTA</button></div>
+<div id="loginForm"><div class="form-group"><label class="form-label">EMAIL</label><input id="loginEmail" class="form-input" type="email" placeholder="seu@email.com"></div><div class="form-group"><label class="form-label">SENHA</label><div class="input-group"><input id="loginPass" class="form-input" type="password" placeholder="••••••••"><button class="eye-btn" onclick="toggleEye('loginPass')">👁️</button></div></div><button class="btn-publish" style="width:100%" onclick="doLogin()">ENTRAR NO MULTIPLAYER</button></div>
+<div id="registerForm" style="display:none"><div class="form-group"><label class="form-label">NOME GAMER</label><input id="regName" class="form-input" type="text" placeholder="Ex: 666Studio804" maxlength="20" oninput="checkStrength()"></div><div class="form-group"><label class="form-label">EMAIL</label><input id="regEmail" class="form-input" type="email" placeholder="seu@email.com"></div><div class="form-group"><label class="form-label">SENHA</label><div class="input-group"><input id="regPass" class="form-input" type="password" placeholder="Mín 6" oninput="checkStrength()"><button class="eye-btn" onclick="toggleEye('regPass')">👁️</button></div><div class="strength-bar"><div id="strengthFill" class="strength-fill"></div></div><div id="strengthText" style="font-size:10px;margin-top:4px"></div></div><div class="form-group"><label class="form-label">CONFIRMAR SENHA</label><input id="regPass2" class="form-input" type="password" placeholder="Repita"></div><button class="btn-publish" style="width:100%" onclick="doRegister()">CRIAR CONTA GLOBAL</button></div>
+</div></div></div>
+
+<!-- ADD MODAL -->
+<div id="addModal" class="modal-overlay"><div class="modal"><div class="modal-header"><div class="modal-title">🌐 ADICIONAR JOGO PARA TODO MUNDO VER</div><button class="modal-close" onclick="closeAdd()">✕</button></div><div style="padding:0 20px"><div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div></div><div class="modal-body">
+<div class="form-group"><label class="form-label">1_ NOME DO JOGO *</label><input id="gameName" class="form-input" type="text" placeholder="Ex: Elden Ring Legends" maxlength="50" oninput="updateProgress();updatePreview()"><div class="char-count"><span id="nameCount">0</span>/50</div></div>
+<div class="form-group"><label class="form-label">2_ DESCRIÇÃO *</label><textarea id="gameDesc" class="form-textarea" placeholder="Descrição que TODA comunidade verá..." maxlength="200" oninput="updateProgress();updatePreview()"></textarea><div class="char-count"><span id="descCount">0</span>/200</div></div>
+<div class="form-group"><label class="form-label">3_ ARQUIVO .EXE / .APK *</label><div class="file-drop"><div>📦 Clique - Será baixado por todos</div><div style="font-size:10px;opacity:0.5;margin-top:4px">Max 100MB • .EXE e .APK • Visível global</div><input id="fileExe" type="file" accept=".exe,.apk" onchange="handleExe(this)"></div><div id="exeInfo" style="display:none"></div></div>
+<div class="form-group"><label class="form-label">4_ ÍCONE *</label><div class="file-drop purple"><div>🖼️ Ícone global</div><input id="fileIcon" type="file" accept="image/*" onchange="handleIcon(this)"></div><div 
